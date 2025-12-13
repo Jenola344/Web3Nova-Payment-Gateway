@@ -123,10 +123,10 @@ web3nova-payment-gateway/
 ├── README.md
 ```
 
-## 🚀 Features
+## Features
 
 ### Payment Features
-- **Stage-based Payments**: 20%, 20%, 10% payment structure
+- **Stage-based Payments**: 40%, 40%, 20% payment structure
 - **Multiple Payment Methods**: Monnify integration (Cards, Bank Transfer, USSD)
 - **Payment Tracking**: Real-time payment status updates
 - **Automated Reminders**: Email/SMS reminders for pending payments
@@ -156,7 +156,7 @@ web3nova-payment-gateway/
 - **Push Notifications**: Instant payment confirmations
 - **Live Dashboard**: Admin dashboard with live metrics
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js >= 18.x
 - PostgreSQL >= 14.x
@@ -169,7 +169,7 @@ web3nova-payment-gateway/
 
 ### 1. Clone Repository
 ```bash
-git clone <repository-url>
+git https://github.com/Jenola344/Web3Nova-Payment-Gateway.git
 cd web3nova-payment-gateway
 ```
 
@@ -263,7 +263,7 @@ npm run db:seed
 npm run dev
 ```
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ### Development
 ```bash
@@ -275,7 +275,7 @@ docker-compose -f docker/docker-compose.dev.yml up
 docker-compose -f docker/docker-compose.yml up -d
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Authentication
 ```
@@ -320,10 +320,9 @@ GET    /api/v1/admin/audit-logs       - Audit trail
 POST   /api/v1/webhooks/monnify      - Monnify webhook
 ```
 
-## 🔐 Security Best Practices
+## Security Best Practices
 
-1. **Never commit `.env` file**
-2. **Use strong JWT secrets** (min 32 characters)
+2. **Use strong JWT secrets**
 3. **Enable SSL in production**
 4. **Regularly update dependencies**
 5. **Implement IP whitelisting for admin routes**
@@ -331,9 +330,8 @@ POST   /api/v1/webhooks/monnify      - Monnify webhook
 7. **Validate all webhook signatures**
 8. **Encrypt sensitive data at rest**
 9. **Implement request signing for critical operations**
-10. **Regular security audits**
 
-## 📊 Database Schema
+## Database Schema
 
 ### Users Table
 ```sql
@@ -374,7 +372,7 @@ POST   /api/v1/webhooks/monnify      - Monnify webhook
 - created_at
 ```
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -390,13 +388,13 @@ npm run test:integration
 npm run test:coverage
 ```
 
-## 📈 Monitoring
+## Monitoring
 
 - Logs are stored in `/logs` directory
 - Use `npm run logs` to tail logs
 - Metrics available at `/api/v1/health`
 
-## 🚀 Deployment
+## Deployment
 
 ### AWS EC2 Deployment
 1. Launch EC2 instance (Ubuntu 22.04)
