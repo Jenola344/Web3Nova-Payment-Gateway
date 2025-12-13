@@ -1,20 +1,51 @@
 {
   "name": "web3nova-payment-gateway",
   "version": "1.0.0",
-  "description": "",
+  "description": "Secure payment gateway for Web3Nova Academy",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "payment",
+    "gateway",
+    "web3nova",
+    "education"
+  ],
+  "author": "Web3Nova Team",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "aws-sdk": "^2.1693.0",
+    "axios": "^1.13.2",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.16.3",
+    "redis": "^5.10.0",
+    "socket.io": "^4.8.1",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.11",
-    "redis": "^5.10.0"
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
