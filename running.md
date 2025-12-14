@@ -42,15 +42,6 @@ npm install
 ### **Step 3: Configure Environment**
 ```bash
 cp .env.example .env
-
-# Edit .env - CRITICAL VALUES:
-# - JWT_SECRET (generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-# - JWT_REFRESH_SECRET (generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-# - ENCRYPTION_KEY (generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-# - DB_PASSWORD
-# - MONNIFY_API_KEY
-# - MONNIFY_SECRET_KEY
-# - MONNIFY_CONTRACT_CODE
 ```
 
 ### **Step 4: Start Database & Redis**
