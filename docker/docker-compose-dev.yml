@@ -33,7 +33,7 @@ services:
       - redis_dev_data:/data
     networks:
       - web3nova_dev_network
-    command: redis-server --appendonly yes --requirepass redis_dev_password
+    command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
