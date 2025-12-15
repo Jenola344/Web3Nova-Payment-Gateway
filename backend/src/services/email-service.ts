@@ -69,7 +69,7 @@ export const sendPaymentConfirmationEmail = async (
     await transporter.sendMail(mailOptions);
     console.log(`Payment confirmation email sent to ${email}`);
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.log('Error sending email:', error);
     throw error;
   }
 };
@@ -122,6 +122,6 @@ export const sendPaymentPendingEmail = async (
     await transporter.sendMail(mailOptions);
     console.log(`Payment pending email sent to ${email}`);
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.log('Error sending email:', error);
   }
 };
