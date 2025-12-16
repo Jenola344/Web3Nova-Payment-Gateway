@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch server.ts",
     "build": "tsc",
-    "start": "node --loader ts-node/esm server.ts",
+    "start": "tsx server.ts",
     "postinstall": "npm run build"
   },
   "type": "module",
