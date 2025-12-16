@@ -1,10 +1,13 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 import { MonnifyVerificationResponse } from '../types/index.ts';
 
-const MONNIFY_BASE_URL = process.env.MONNIFY_BASE_URL || 'https://sandbox.monnify.com';
+const MONNIFY_BASE_URL = process.env.MONNIFY_BASE_URL;
 const MONNIFY_API_KEY = process.env.MONNIFY_API_KEY;
 const MONNIFY_SECRET_KEY = process.env.MONNIFY_SECRET_KEY;
 const MONNIFY_CONTRACT_CODE = process.env.MONNIFY_CONTRACT_CODE;
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 // Get Monnify authentication token
 const getMonnifyToken = async (): Promise<string> => {
@@ -21,7 +24,7 @@ const getMonnifyToken = async (): Promise<string> => {
         }
       }
     );
-
+    
     return response.data.responseBody.accessToken;
   } catch (error: any) {
     console.error('Error getting Monnify token:', error.response?.data || error.message);
@@ -53,7 +56,7 @@ export const verifyMonnifyTransaction = async (
   }
 };
 
-// Initialize payment (generate account details)
+// Initialize payment (generate payment link and account details)
 export const initializeMonnifyPayment = async (
   amount: number,
   customerEmail: string,
@@ -61,6 +64,7 @@ export const initializeMonnifyPayment = async (
 ): Promise<any> => {
   try {
     const token = await getMonnifyToken();
+    const paymentReference = `WEB3NOVA_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const response = await axios.post(
       `${MONNIFY_BASE_URL}/api/v1/merchant/transactions/init-transaction`,
@@ -68,12 +72,13 @@ export const initializeMonnifyPayment = async (
         amount,
         customerName,
         customerEmail,
-        paymentReference: `WEB3NOVA_${Date.now()}`,
-        paymentDescription: 'Web3Nova Academy Course Fee',
+        paymentReference,
+        paymentDescription: 'Web3Nova Academy Course Fee Payment',
         currencyCode: 'NGN',
         contractCode: MONNIFY_CONTRACT_CODE,
-        redirectUrl: 'http://localhost::3000/dashboard',
-        paymentMethods: ['ACCOUNT_TRANSFER']
+        redirectUrl: `${FRONTEND_URL}/dashboard?payment=success`,
+        paymentMethods: ['CARD', 'ACCOUNT_TRANSFER'],
+        incomeSplitConfig: []
       },
       {
         headers: {
@@ -83,18 +88,17 @@ export const initializeMonnifyPayment = async (
       }
     );
 
-    return response.data.responseBody;
+    const responseBody = response.data.responseBody;
+
+    return {
+      checkoutUrl: responseBody.checkoutUrl,
+      paymentReference: responseBody.paymentReference,
+      transactionReference: responseBody.transactionReference,
+      accountDetails: responseBody.accountDetails || [],
+      enabledPaymentMethod: responseBody.enabledPaymentMethod
+    };
   } catch (error: any) {
     console.error('Error initializing Monnify payment:', error.response?.data || error.message);
     throw new Error('Failed to initialize payment with Monnify');
   }
-};
-
-// Get bank account details for transfer
-export const getBankDetails = () => {
-  return {
-    bankName: process.env.BANK_NAME || 'Your Bank Name',
-    accountNumber: process.env.ACCOUNT_NUMBER || '1234567890',
-    accountName: process.env.ACCOUNT_NAME || 'Web3Nova Academy'
-  };
 };

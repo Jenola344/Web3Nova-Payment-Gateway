@@ -129,7 +129,7 @@ async function registerStudent(student: Student): Promise<RegistrationResult> {
     skill: student.skill,
     location: student.location,
     scholarshipType: student.scholarshipType,
-    password: `${student.email.split('@')[0] + student.location}`
+    password: `${student.email.split('@')[0] + student.fullName.split(' ')[0]}`
   };
 
   const curlCommand = `curl -X POST ${API_URL} -H "Content-Type: application/json" -d "${JSON.stringify(payload).replace(/"/g, '\\"')}"`;

@@ -3,215 +3,328 @@ import { AuthRequest } from '../types/index.ts';
 import Student from '../models/Student.ts';
 import { 
   verifyMonnifyTransaction, 
-  initializeMonnifyPayment, 
-  getBankDetails 
+  initializeMonnifyPayment
 } from '../services/payment-service';
 import { 
-  sendPaymentConfirmationEmail, 
-  sendPaymentPendingEmail 
+  sendPaymentConfirmationEmail
 } from '../services/email-service';
 
-// Initiate payment
+// Initiate payment with Monnify
 export const initiatePayment = async (req: AuthRequest, res: Response) => {
-    try {
-        const studentId = req.user?.id;
-        const { amount } = req.body;
+  try {
+    const studentId = req.user?.id;
+    const { amount } = req.body;
 
-        if (!amount || amount <= 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid payment amount'
-        });
-        }
-
-        const student = await Student.findById(studentId);
-
-        if (!student) {
-        return res.status(404).json({
-            success: false,
-            message: 'Student not found'
-        });
-        }
-
-        if (amount > student.remainingBalance) {
-        return res.status(400).json({
-            success: false,
-            message: 'Amount exceeds remaining balance'
-        });
-        }
-
-        // Get bank details for manual transfer
-        const bankDetails = getBankDetails();
-
-        return res.status(200).json({
-        success: true,
-        message: 'Payment initiated successfully',
-        bankDetails,
-        amount
-        });
-
-    } catch (error: any) {
-        console.error('Initiate payment error:', error);
-        return res.status(500).json({
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
         success: false,
-        message: 'Server error while initiating payment'
-        });
+        message: 'Invalid payment amount'
+      });
     }
+
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    if (amount > student.remainingBalance) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount exceeds remaining balance'
+      });
+    }
+
+    // Initialize Monnify payment
+    const paymentData = await initializeMonnifyPayment(
+      amount,
+      student.email,
+      student.fullName
+    );
+
+    // Add payment as pending with Monnify reference
+    student.paymentHistory.push({
+      amount: amount,
+      date: new Date(),
+      status: 'pending',
+      transactionReference: paymentData.paymentReference,
+      monnifyReference: paymentData.paymentReference
+    });
+
+    await student.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment initiated successfully',
+      paymentData: {
+        checkoutUrl: paymentData.checkoutUrl,
+        paymentReference: paymentData.paymentReference,
+        accountDetails: paymentData.accountDetails,
+        amount: amount
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Initiate payment error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while initiating payment'
+    });
+  }
 };
 
-// Confirm payment (student submits transaction reference)
-export const confirmPayment = async (req: AuthRequest, res: Response) => {
-    try {
-        const studentId = req.user?.id;
-        const { transactionReference } = req.body;
+// Webhook to receive Monnify payment notifications
+export const monnifyWebhook = async (req: AuthRequest, res: Response) => {
+  try {
+    const { paymentReference, paymentStatus, amountPaid } = req.body;
 
-        if (!transactionReference) {
-        return res.status(400).json({
-            success: false,
-            message: 'Transaction reference is required'
-        });
-        }
+    // Find student with this payment reference
+    const student = await Student.findOne({
+      'paymentHistory.transactionReference': paymentReference
+    });
 
-        const student = await Student.findById(studentId);
-
-        if (!student) {
-        return res.status(404).json({
-            success: false,
-            message: 'Student not found'
-        });
-        }
-
-        // Check if transaction reference already exists
-        const existingPayment = student.paymentHistory.find(
-        p => p.transactionReference === transactionReference
-        );
-
-        if (existingPayment) {
-        return res.status(400).json({
-            success: false,
-            message: 'This transaction has already been submitted'
-        });
-        }
-
-        // Add payment as pending
-        student.paymentHistory.push({
-        amount: 0, // Will be updated after verification
-        date: new Date(),
-        status: 'pending',
-        transactionReference
-        });
-
-        await student.save();
-
-        // Send pending email
-        await sendPaymentPendingEmail(student.email, student.fullName, 0);
-
-        // In production, you would verify this with Monnify here
-        // For now, we'll just mark it as pending and admin can verify manually
-
-        return res.status(200).json({
-        success: true,
-        message: 'Payment confirmation received. Verification in progress.'
-        });
-
-    } catch (error: any) {
-        console.error('Confirm payment error:', error);
-        return res.status(500).json({
+    if (!student) {
+      return res.status(404).json({
         success: false,
-        message: 'Server error while confirming payment'
-        });
+        message: 'Payment record not found'
+      });
     }
-};
 
-// Verify payment with Monnify (called by webhook or admin)
-export const verifyPayment = async (req: AuthRequest, res: Response) => {
-    try {
-        const { transactionReference, studentId } = req.body;
+    // Find the payment in history
+    const paymentIndex = student.paymentHistory.findIndex(
+      p => p.transactionReference === paymentReference
+    );
 
-        if (!transactionReference || !studentId) {
-        return res.status(400).json({
-            success: false,
-            message: 'Transaction reference and student ID are required'
-        });
-        }
+    if (paymentIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found'
+      });
+    }
 
-        const student = await Student.findById(studentId);
+    if (paymentStatus === 'PAID') {
+      // Update payment status
+      student.paymentHistory[paymentIndex].status = 'verified';
+      student.paymentHistory[paymentIndex].amount = amountPaid;
 
-        if (!student) {
-        return res.status(404).json({
-            success: false,
-            message: 'Student not found'
-        });
-        }
+      // Update student balance
+      student.amountPaid += amountPaid;
+      student.remainingBalance = Math.max(0, student.remainingBalance - amountPaid);
 
-        // Verify with Monnify
-        const verificationResult = await verifyMonnifyTransaction(transactionReference);
+      await student.save();
 
-        if (!verificationResult.requestSuccessful) {
-        return res.status(400).json({
-            success: false,
-            message: 'Transaction verification failed'
-        });
-        }
-
-        const { responseBody } = verificationResult;
-
-        if (responseBody.paymentStatus !== 'PAID') {
-        return res.status(400).json({
-            success: false,
-            message: 'Payment not completed'
-        });
-        }
-
-        const amount = responseBody.amountPaid;
-
-        // Find the pending payment
-        const paymentIndex = student.paymentHistory.findIndex(
-        p => p.transactionReference === transactionReference && p.status === 'pending'
-        );
-
-        if (paymentIndex === -1) {
-        return res.status(404).json({
-            success: false,
-            message: 'Pending payment not found'
-        });
-        }
-
-        // Update payment
-        student.paymentHistory[paymentIndex].status = 'verified';
-        student.paymentHistory[paymentIndex].amount = amount;
-        student.paymentHistory[paymentIndex].monnifyReference = responseBody.paymentReference;
-
-        // Update student balance
-        student.amountPaid += amount;
-        student.remainingBalance = Math.max(0, student.remainingBalance - amount);
-
-        await student.save();
-
-        // Send confirmation email
-        await sendPaymentConfirmationEmail(
+      // Send confirmation email
+      await sendPaymentConfirmationEmail(
         student.email,
         student.fullName,
-        amount,
-        transactionReference
-        );
+        amountPaid,
+        paymentReference
+      );
 
-        return res.status(200).json({
+      return res.status(200).json({
         success: true,
-        message: 'Payment verified successfully',
-        student: {
-            amountPaid: student.amountPaid,
-            remainingBalance: student.remainingBalance
-        }
-        });
+        message: 'Payment verified successfully'
+      });
+    } else {
+      // Update payment as failed
+      student.paymentHistory[paymentIndex].status = 'failed';
+      await student.save();
 
-    } catch (error: any) {
-        console.error('Verify payment error:', error);
-        return res.status(500).json({
-        success: false,
-        message: 'Server error while verifying payment'
-        });
+      return res.status(200).json({
+        success: true,
+        message: 'Payment status updated'
+      });
     }
+
+  } catch (error: any) {
+    console.error('Webhook error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error processing webhook'
+    });
+  }
+};
+
+// Manual verification by admin
+export const verifyPayment = async (req: AuthRequest, res: Response) => {
+  try {
+    const { transactionReference, studentId } = req.body;
+
+    if (!transactionReference || !studentId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Transaction reference and student ID are required'
+      });
+    }
+
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    // Verify with Monnify
+    const verificationResult = await verifyMonnifyTransaction(transactionReference);
+
+    if (!verificationResult.requestSuccessful) {
+      return res.status(400).json({
+        success: false,
+        message: 'Transaction verification failed'
+      });
+    }
+
+    const { responseBody } = verificationResult;
+
+    if (responseBody.paymentStatus !== 'PAID') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment not completed'
+      });
+    }
+
+    const amount = responseBody.amountPaid;
+
+    // Find the pending payment
+    const paymentIndex = student.paymentHistory.findIndex(
+      p => p.transactionReference === transactionReference
+    );
+
+    if (paymentIndex === -1) {
+      // Create new payment record if not found
+      student.paymentHistory.push({
+        amount,
+        date: new Date(),
+        status: 'verified',
+        transactionReference,
+        monnifyReference: responseBody.paymentReference
+      });
+    } else {
+      // Update existing payment
+      student.paymentHistory[paymentIndex].status = 'verified';
+      student.paymentHistory[paymentIndex].amount = amount;
+      student.paymentHistory[paymentIndex].monnifyReference = responseBody.paymentReference;
+    }
+
+    // Update student balance
+    student.amountPaid += amount;
+    student.remainingBalance = Math.max(0, student.remainingBalance - amount);
+
+    await student.save();
+
+    // Send confirmation email
+    await sendPaymentConfirmationEmail(
+      student.email,
+      student.fullName,
+      amount,
+      transactionReference
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment verified successfully',
+      student: {
+        amountPaid: student.amountPaid,
+        remainingBalance: student.remainingBalance
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Verify payment error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while verifying payment'
+    });
+  }
+};
+
+// Check payment status (for polling)
+export const checkPaymentStatus = async (req: AuthRequest, res: Response) => {
+  try {
+    const studentId = req.user?.id;
+    const { paymentReference } = req.params;
+
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    const payment = student.paymentHistory.find(
+      p => p.transactionReference === paymentReference || p.monnifyReference === paymentReference
+    );
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found'
+      });
+    }
+
+    // If still pending, try to verify with Monnify
+    if (payment.status === 'pending') {
+      try {
+        const verificationResult = await verifyMonnifyTransaction(paymentReference);
+        
+        if (verificationResult.requestSuccessful && 
+            verificationResult.responseBody.paymentStatus === 'PAID') {
+          
+          const amount = verificationResult.responseBody.amountPaid;
+          
+          // Update payment
+          const paymentIndex = student.paymentHistory.findIndex(
+            p => p.transactionReference === paymentReference
+          );
+          
+          student.paymentHistory[paymentIndex].status = 'verified';
+          student.paymentHistory[paymentIndex].amount = amount;
+          
+          student.amountPaid += amount;
+          student.remainingBalance = Math.max(0, student.remainingBalance - amount);
+          
+          await student.save();
+          
+          await sendPaymentConfirmationEmail(
+            student.email,
+            student.fullName,
+            amount,
+            paymentReference
+          );
+        }
+      } catch (verifyError) {
+        console.error('Verification error:', verifyError);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      payment: {
+        amount: payment.amount,
+        status: payment.status,
+        date: payment.date,
+        reference: payment.transactionReference
+      },
+      student: {
+        amountPaid: student.amountPaid,
+        remainingBalance: student.remainingBalance
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Check payment status error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while checking payment status'
+    });
+  }
 };
 
 // Get payment tracker (public)

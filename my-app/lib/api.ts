@@ -38,12 +38,9 @@ export const api = {
         return res.json();
     },
 
-    async confirmPayment(transactionReference: string) {
-        const res = await fetch(`${API_URL}/payments/confirm`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    async checkPaymentStatus(paymentReference: string) {
+        const res = await fetch(`${API_URL}/payments/status/${paymentReference}`, {
         credentials: 'include',
-        body: JSON.stringify({ transactionReference }),
         });
         return res.json();
     },
@@ -68,6 +65,16 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ studentId, amount }),
+        });
+        return res.json();
+    },
+    
+    async verifyPayment(transactionReference: string, studentId: string) {
+        const res = await fetch(`${API_URL}/payments/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ transactionReference, studentId }),
         });
         return res.json();
     },

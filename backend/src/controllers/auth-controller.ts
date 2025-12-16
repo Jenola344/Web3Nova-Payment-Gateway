@@ -24,7 +24,7 @@ export const login = async (req: Request, res: Response) => {
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Invalid email or password'
+          message: 'Invalid email'
         });
       }
       userId = user._id?.toString();
@@ -33,7 +33,7 @@ export const login = async (req: Request, res: Response) => {
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Invalid email or password'
+          message: 'Invalid email'
         });
       }
       userId = user._id?.toString();
@@ -43,13 +43,14 @@ export const login = async (req: Request, res: Response) => {
         message: 'Invalid role specified'
       });
     }
-
+    
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid password'
       });
     }
 
@@ -116,8 +117,9 @@ export const registerStudent = async (req: Request, res: Response) => {
     let remainingBalance = 100000;
 
     if (scholarshipType === 'Fully Funded') {
-      totalFees = 0;
-      remainingBalance = 0;
+      // Fully funded students now pay 20k
+      totalFees = 20000;
+      remainingBalance = 20000;
     } else if (scholarshipType === 'Half Funded') {
       totalFees = 50000;
       remainingBalance = 50000;
@@ -144,7 +146,8 @@ export const registerStudent = async (req: Request, res: Response) => {
       student: {
         id: student._id,
         fullName: student.fullName,
-        email: student.email
+        email: student.email,
+        totalFees: student.totalFees
       }
     });
 
