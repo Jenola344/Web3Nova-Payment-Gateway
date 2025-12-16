@@ -129,20 +129,16 @@ export default function Home() {
             <p className="text-purple-200 mb-6">All students must pay ₦20,000 by December 31, 2025</p>
             <div className="flex justify-center gap-4">
               <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
-                <div className="text-3xl font-bold text-white">{countdown.days}</div>
-                <div className="text-sm text-purple-100">Days</div>
+                <div className="text-xl font-bold text-white">{countdown.days}</div>
               </div>
               <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
-                <div className="text-3xl font-bold text-white">{countdown.hours}</div>
-                <div className="text-sm text-purple-100">Hours</div>
+                <div className="text-xl font-bold text-white">{countdown.hours}</div>
               </div>
               <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
-                <div className="text-3xl font-bold text-white">{countdown.minutes}</div>
-                <div className="text-sm text-purple-100">Minutes</div>
+                <div className="text-xl font-bold text-white">{countdown.minutes}</div>
               </div>
               <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
-                <div className="text-3xl font-bold text-white">{countdown.seconds}</div>
-                <div className="text-sm text-purple-100">Seconds</div>
+                <div className="text-xl font-bold text-white">{countdown.seconds}</div>
               </div>
             </div>
           </div>
