@@ -16,6 +16,7 @@ export default function UserDashboard() {
 
     useEffect(() => {
         fetchProfile();
+        //if exisiting pending trasactions that are not verified yet, poll to check status and verify
     }, []);
 
     // Countdown timer
@@ -94,7 +95,7 @@ export default function UserDashboard() {
         } catch (error) {
             console.error('Polling error:', error);
         }
-        }, 5000); // Poll every 5 seconds
+        }, 30000); // Poll every 30 seconds
 
         // Stop polling after 10 minutes
         setTimeout(() => clearInterval(pollInterval), 600000);

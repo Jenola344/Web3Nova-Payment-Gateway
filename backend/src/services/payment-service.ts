@@ -38,6 +38,7 @@ export const verifyMonnifyTransaction = async (
 ): Promise<MonnifyVerificationResponse> => {
   try {
     const token = await getMonnifyToken();
+    console.log('Verifying transaction with reference:', transactionReference);
 
     const response = await axios.get(
       `${MONNIFY_BASE_URL}/api/v2/transactions/${encodeURIComponent(transactionReference)}`,

@@ -38,6 +38,13 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    if(student.paymentHistory.some(p => p.status === 'pending')) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have a pending payment. Please complete it before initiating a new one.'
+      });
+    }
+
     // Initialize Monnify payment
     const paymentData = await initializeMonnifyPayment(
       amount,
@@ -300,7 +307,7 @@ export const checkPaymentStatus = async (req: AuthRequest, res: Response) => {
           );
         }
       } catch (verifyError) {
-        console.error('Verification error:', verifyError);
+        console.log('Verification error:', verifyError);
       }
     }
 
