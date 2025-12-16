@@ -5,9 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "dev": "tsx watch server.ts",
-    "build": "tsc",
-    "start": "tsx server.ts",
-    "postinstall": "npm run build"
+    "start": "tsx server.ts"
   },
   "type": "module",
   "keywords": [],
