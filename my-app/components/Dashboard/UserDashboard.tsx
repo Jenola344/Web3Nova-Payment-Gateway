@@ -138,22 +138,22 @@ export default function UserDashboard() {
     const getPaymentOptions = () => {
         if (student.scholarshipType === 'Fully Funded') {
             return [
-                { label: 'Full Payment - ₦200', amount: 200 }
+                { label: 'Full Payment - ₦20000', amount: 20000 }
             ];
         } else if (student.scholarshipType === 'Half Funded') {
             return [
-                { label: 'First Payment - ₦200', amount: 200 },
-                { label: 'Second Payment - ₦200', amount: 200 },
-                { label: 'Final Payment - ₦100', amount: 100 }
+                { label: 'First Payment - ₦20000', amount: 20000 },
+                { label: 'Second Payment - ₦20000', amount: 20000 },
+                { label: 'Final Payment - ₦10000', amount: 10000 }
             ];
         } else {
             return [
-                { label: 'Full Payment - ₦1000', amount: 1000 }
+                { label: 'Full Payment - ₦100000', amount: 100000 }
             ];
         }
     };
 
-    const needsDeadlinePayment = student.amountPaid < 200;
+    const needsDeadlinePayment = student.amountPaid < 20000;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">

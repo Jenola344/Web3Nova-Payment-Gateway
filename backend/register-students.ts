@@ -5,7 +5,7 @@ const execPromise = promisify(exec);
 
 // Your CSV data as a string
 const csvData = `SCHOLARSHIP_TYPE,FULL NAME,EMAIL ADDRESS,PHONE NUMBER,SKILL TO BE ADDMITED TO,LOCATION FOR CLASS
-Fully Funded,Marvellous Makinde,ogunodemarvellous@gmail.com,08053744603,Smart Contract,Online
+Fully Funded,Jesutola Olusegun,jesutolaolusegun@gmail.com,08138003389,Smart Contract,Pysically
 Fully Funded,Isaac Makinde,ismakinde@gmail.com,08053744603,Smart Contract,Online
 Fully Funded,Shittu Israel  Oluwafisayomi,shittuisrael004@gmail.com,08136695747,Smart Contract,Pysically
 Fully Funded,Fasumirin Pamilerin Israel,pamilerinfash@gmail.com,09031955417,Smart Contract,Pysically

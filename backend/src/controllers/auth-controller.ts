@@ -113,16 +113,16 @@ export const registerStudent = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Calculate fees based on scholarship type
-    let totalFees = 1000;
-    let remainingBalance = 1000;
+    let totalFees = 100000;
+    let remainingBalance = 100000;
 
     if (scholarshipType === 'Fully Funded') {
-      // Fully funded students now pay 20k
-      totalFees = 200;
-      remainingBalance = 200;
+      // Fully funded students pay 20k
+      totalFees = 20000;  
+      remainingBalance = 20000;
     } else if (scholarshipType === 'Half Funded') {
-      totalFees = 500;
-      remainingBalance = 500;
+      totalFees = 50000;
+      remainingBalance = 50000;
     }
 
     // Create new student

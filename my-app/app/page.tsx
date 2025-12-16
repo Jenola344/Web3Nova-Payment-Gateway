@@ -128,16 +128,16 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-white mb-4">⏰ Payment Deadline</h2>
             <p className="text-purple-200 mb-6">All students must pay ₦20,000 by December 31, 2025</p>
             <div className="flex justify-center gap-4">
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
+              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
                 <div className="text-xl font-bold text-white">{countdown.days}</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
+              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
                 <div className="text-xl font-bold text-white">{countdown.hours}</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
+              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
                 <div className="text-xl font-bold text-white">{countdown.minutes}</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 min-w-[90px] shadow-lg">
+              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
                 <div className="text-xl font-bold text-white">{countdown.seconds}</div>
               </div>
             </div>
