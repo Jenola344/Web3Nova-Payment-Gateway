@@ -1,6 +1,6 @@
 import express from 'express';
-import { login, logout, registerStudent, registerAdmin } from '../controllers/auth-controller.ts';
-import { loginLimiter } from '../middleware/rate-limiter.ts';
+import { login, logout, registerStudent, registerAdmin } from '../controllers/auth-controller';
+import { loginLimiter } from '../middleware/rate-limiter';
 
 const router = express.Router();
 

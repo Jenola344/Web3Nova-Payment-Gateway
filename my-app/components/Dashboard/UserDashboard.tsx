@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Student } from '@/types/index';
@@ -12,11 +13,20 @@ export default function UserDashboard() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [paymentData, setPaymentData] = useState<any>(null);
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const searchParams = useSearchParams();
+    const paymentReference = searchParams.get('paymentReference');
     const router = useRouter();
 
     useEffect(() => {
         fetchProfile();
         //if exisiting pending trasactions that are not verified yet, poll to check status and verify
+        if (paymentReference) {
+            api.checkPaymentStatus(paymentReference).then((response) => {
+                if (response.success) {
+                    fetchProfile();
+                }
+            });
+        }
     }, []);
 
     // Countdown timer
@@ -128,22 +138,22 @@ export default function UserDashboard() {
     const getPaymentOptions = () => {
         if (student.scholarshipType === 'Fully Funded') {
         return [
-            { label: 'Full Payment - ₦20,000', amount: 20000 }
+            { label: 'Full Payment - ₦200', amount: 200 }
         ];
         } else if (student.scholarshipType === 'Half Funded') {
         return [
-            { label: 'First Payment - ₦20,000', amount: 20000 },
-            { label: 'Second Payment - ₦20,000', amount: 20000 },
-            { label: 'Final Payment - ₦10,000', amount: 10000 }
+            { label: 'First Payment - ₦200', amount: 200 },
+            { label: 'Second Payment - ₦200', amount: 200 },
+            { label: 'Final Payment - ₦100', amount: 100 }
         ];
         } else {
         return [
-            { label: 'Full Payment - ₦100,000', amount: 100000 }
+            { label: 'Full Payment - ₦1000', amount: 1000 }
         ];
         }
     };
 
-    const needsDeadlinePayment = student.amountPaid < 20000;
+    const needsDeadlinePayment = student.amountPaid < 200;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">

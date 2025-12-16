@@ -1,11 +1,11 @@
 import { Response } from 'express';
-import { AuthRequest } from '../types/index.ts';
-import Student from '../models/Student.ts';
-import { 
-  verifyMonnifyTransaction, 
+import { AuthRequest } from '../types/index';
+import Student from '../models/Student';
+import {
+  verifyMonnifyTransaction,
   initializeMonnifyPayment
 } from '../services/payment-service';
-import { 
+import {
   sendPaymentConfirmationEmail
 } from '../services/email-service';
 
@@ -38,7 +38,7 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if(student.paymentHistory.some(p => p.status === 'pending')) {
+    if (student.paymentHistory.some(p => p.status === 'pending')) {
       return res.status(400).json({
         success: false,
         message: 'You have a pending payment. Please complete it before initiating a new one.'
@@ -58,7 +58,7 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
       date: new Date(),
       status: 'pending',
       transactionReference: paymentData.paymentReference,
-      monnifyReference: paymentData.paymentReference
+      monnifyReference: paymentData.transactionReference
     });
 
     await student.save();
@@ -280,25 +280,25 @@ export const checkPaymentStatus = async (req: AuthRequest, res: Response) => {
     if (payment.status === 'pending') {
       try {
         const verificationResult = await verifyMonnifyTransaction(paymentReference);
-        
-        if (verificationResult.requestSuccessful && 
-            verificationResult.responseBody.paymentStatus === 'PAID') {
-          
+
+        if (verificationResult.requestSuccessful &&
+          verificationResult.responseBody.paymentStatus === 'PAID') {
+
           const amount = verificationResult.responseBody.amountPaid;
-          
+
           // Update payment
           const paymentIndex = student.paymentHistory.findIndex(
             p => p.transactionReference === paymentReference
           );
-          
+
           student.paymentHistory[paymentIndex].status = 'verified';
           student.paymentHistory[paymentIndex].amount = amount;
-          
+
           student.amountPaid += amount;
           student.remainingBalance = Math.max(0, student.remainingBalance - amount);
-          
+
           await student.save();
-          
+
           await sendPaymentConfirmationEmail(
             student.email,
             student.fullName,

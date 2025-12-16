@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { AuthRequest } from '../types/index.ts';
-import Student from '../models/Student.ts';
+import { AuthRequest } from '../types/index';
+import Student from '../models/Student';
 
 // Get student profile
 export const getStudentProfile = async (req: AuthRequest, res: Response) => {
@@ -100,7 +100,7 @@ export const updateStudentProfile = async (req: AuthRequest, res: Response) => {
     await student.save();
 
     const updatedStudent = student.toObject();
-    delete updatedStudent.password;
+    delete (updatedStudent as any).password;
 
     return res.status(200).json({
       success: true,

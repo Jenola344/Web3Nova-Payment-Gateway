@@ -1,13 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IStudent, IPayment } from '../types/index.js';
+import { IStudent, IPayment } from '../types/index';
 
 const PaymentSchema = new Schema<IPayment>({
   amount: { type: Number, required: true },
   date: { type: Date, default: Date.now },
-  status: { 
-    type: String, 
-    enum: ['pending', 'verified', 'failed'], 
-    default: 'pending' 
+  status: {
+    type: String,
+    enum: ['pending', 'verified', 'failed'],
+    default: 'pending'
   },
   transactionReference: { type: String },
   monnifyReference: { type: String }
@@ -20,10 +20,10 @@ const StudentSchema = new Schema<IStudent>(
     phoneNumber: { type: String, required: true },
     skill: { type: String, required: true },
     location: { type: String, required: true },
-    scholarshipType: { 
-      type: String, 
+    scholarshipType: {
+      type: String,
       enum: ['Fully Funded', 'Half Funded', 'Full Payment'],
-      required: true 
+      required: true
     },
     totalFees: { type: Number, default: 100000 },
     amountPaid: { type: Number, default: 0 },

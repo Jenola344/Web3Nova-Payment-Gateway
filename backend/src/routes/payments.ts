@@ -1,14 +1,14 @@
 import express from 'express';
-import { 
-  initiatePayment, 
+import {
+  initiatePayment,
   monnifyWebhook,
-  verifyPayment, 
-  getPaymentTracker, 
+  verifyPayment,
+  getPaymentTracker,
   updateStudentPayment,
   checkPaymentStatus
-} from '../controllers/payment-controller.ts';
-import { authenticate, authorizeStudent, authorizeAdmin } from '../middleware/authmiddleware.ts';
-import { paymentLimiter } from '../middleware/rate-limiter.ts';
+} from '../controllers/payment-controller';
+import { authenticate, authorizeStudent, authorizeAdmin } from '../middleware/authmiddleware';
+import { paymentLimiter } from '../middleware/rate-limiter';
 
 const router = express.Router();
 

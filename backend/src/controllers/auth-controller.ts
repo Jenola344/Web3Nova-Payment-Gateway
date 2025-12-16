@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import Student from '../models/Student.ts';
-import Admin from '../models/Admin.ts';
+import Student from '../models/Student';
+import Admin from '../models/Admin';
 import { generateToken, setTokenCookie, clearTokenCookie } from '../utils/jwt';
 
 // Student/Admin Login
@@ -43,10 +43,10 @@ export const login = async (req: Request, res: Response) => {
         message: 'Invalid role specified'
       });
     }
-    
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -60,7 +60,7 @@ export const login = async (req: Request, res: Response) => {
 
     // Remove password from response
     const userResponse = user.toObject();
-    delete userResponse.password;
+    delete (userResponse as any).password;
 
     return res.status(200).json({
       success: true,
@@ -113,16 +113,16 @@ export const registerStudent = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Calculate fees based on scholarship type
-    let totalFees = 100000;
-    let remainingBalance = 100000;
+    let totalFees = 1000;
+    let remainingBalance = 1000;
 
     if (scholarshipType === 'Fully Funded') {
       // Fully funded students now pay 20k
-      totalFees = 20000;
-      remainingBalance = 20000;
+      totalFees = 200;
+      remainingBalance = 200;
     } else if (scholarshipType === 'Half Funded') {
-      totalFees = 50000;
-      remainingBalance = 50000;
+      totalFees = 500;
+      remainingBalance = 500;
     }
 
     // Create new student

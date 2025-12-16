@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { AuthRequest } from '../types/index.ts';
-import { verifyToken } from '../utils/jwt.ts';
+import { AuthRequest } from '../types/index';
+import { verifyToken } from '../utils/jwt';
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

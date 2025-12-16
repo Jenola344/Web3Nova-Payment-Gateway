@@ -2,10 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { generalLimiter } from './middleware/rate-limiter.ts';
-import authRoutes from './routes/auth.ts';
-import paymentRoutes from './routes/payments.ts';
-import userRoutes from './routes/user.ts';
+import { generalLimiter } from './middleware/rate-limiter';
+import authRoutes from './routes/auth';
+import paymentRoutes from './routes/payments';
+import userRoutes from './routes/user';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -13,7 +13,7 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
-console.log(process.env.FRONTEND_URL);  
+console.log(process.env.FRONTEND_URL);
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],

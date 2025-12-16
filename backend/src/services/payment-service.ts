@@ -1,7 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
-import { MonnifyVerificationResponse } from '../types/index.ts';
+import { MonnifyVerificationResponse } from '../types/index';
 
 const MONNIFY_BASE_URL = process.env.MONNIFY_BASE_URL;
 const MONNIFY_API_KEY = process.env.MONNIFY_API_KEY;
@@ -13,7 +13,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 const getMonnifyToken = async (): Promise<string> => {
   try {
     const auth = Buffer.from(`${MONNIFY_API_KEY}:${MONNIFY_SECRET_KEY}`).toString('base64');
-    
+
     const response = await axios.post(
       `${MONNIFY_BASE_URL}/api/v1/auth/login`,
       {},
@@ -24,7 +24,7 @@ const getMonnifyToken = async (): Promise<string> => {
         }
       }
     );
-    
+
     return response.data.responseBody.accessToken;
   } catch (error: any) {
     console.error('Error getting Monnify token:', error.response?.data || error.message);
@@ -40,15 +40,35 @@ export const verifyMonnifyTransaction = async (
     const token = await getMonnifyToken();
     console.log('Verifying transaction with reference:', transactionReference);
 
-    const response = await axios.get(
-      `${MONNIFY_BASE_URL}/api/v2/transactions/${encodeURIComponent(transactionReference)}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+    let response;
+
+    // Check if it's our payment reference (starts with WEB3NOVA_) or Monnify's transaction reference
+    if (transactionReference.startsWith('WEB3NOVA_')) {
+      // Use the query endpoint for merchant payment reference
+      response = await axios.get(
+        `${MONNIFY_BASE_URL}/api/v1/merchant/transactions/query`,
+        {
+          params: {
+            paymentReference: transactionReference
+          },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    );
+      );
+    } else {
+      // Use the transaction status endpoint for Monnify transaction reference
+      response = await axios.get(
+        `${MONNIFY_BASE_URL}/api/v2/transactions/${encodeURIComponent(transactionReference)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
 
     return response.data;
   } catch (error: any) {
@@ -77,7 +97,7 @@ export const initializeMonnifyPayment = async (
         paymentDescription: 'Web3Nova Academy Course Fee Payment',
         currencyCode: 'NGN',
         contractCode: MONNIFY_CONTRACT_CODE,
-        redirectUrl: `${FRONTEND_URL}/dashboard?payment=success`,
+        redirectUrl: `${FRONTEND_URL}/dashboard?paymentReference=${paymentReference}`,
         paymentMethods: ['CARD', 'ACCOUNT_TRANSFER'],
         incomeSplitConfig: []
       },
