@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
