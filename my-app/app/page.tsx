@@ -32,7 +32,8 @@ export default function Home() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.strokeStyle = 'rgba(147, 51, 234, 0.2)';
+      // Blue connections
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.2)'; // blue-500 equivalent with opacity
       ctx.lineWidth = 1;
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
@@ -48,7 +49,8 @@ export default function Home() {
         }
       }
 
-      ctx.fillStyle = 'rgba(147, 51, 234, 0.6)';
+      // White/Blue nodes
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       nodes.forEach((node) => {
         ctx.beginPath();
         ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
@@ -97,7 +99,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden p-4">
+    <div className="min-h-screen bg-blue-950 relative overflow-hidden p-4 font-sans text-white">
       <canvas
         ref={canvasRef}
         className="absolute inset-0 z-0"
@@ -105,63 +107,58 @@ export default function Home() {
       />
 
       <div className="absolute inset-0">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse"></div>
-        <div className="absolute top-0 right-4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-20 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse animation-delay-4000"></div>
+        <div className="absolute top-10 left-10 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-[128px] opacity-20 animate-pulse"></div>
+        <div className="absolute top-0 right-4 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-[128px] opacity-10 animate-pulse animation-delay-2000"></div>
+        <div className="absolute bottom-0 left-20 w-96 h-96 bg-blue-400 rounded-full mix-blend-screen filter blur-[128px] opacity-20 animate-pulse animation-delay-4000"></div>
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4">
-        <div className="max-w-6xl w-full text-center flex flex-col items-center gap-8">
+        <div className="max-w-6xl w-full text-center flex flex-col items-center gap-12">
           <div>
-            <div className="flex justify-center">
-              <div className="w-24 h-24 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl animate-bounce">
-                <span className="text-3xl">🚀</span>
+            <div className="flex justify-center mb-6">
+              <div className="w-24 h-24 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
+                <span className="text-4xl">🚀</span>
               </div>
             </div>
-            <h1 className="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 mb-4 animate-fade-in">
+            <h1 className="text-5xl md:text-8xl font-black tracking-tight text-white mb-6 animate-fade-in drop-shadow-lg">
               Web3Nova
             </h1>
+            <p className="text-blue-200 text-xl md:text-2xl max-w-2xl mx-auto">
+              The next generation payment gateway for the future of education.
+            </p>
           </div>
 
           {/* Countdown Timer */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 max-w-2xl w-full shadow-2xl">
-            <h2 className="text-2xl font-bold text-white mb-4">⏰ Payment Deadline</h2>
-            <p className="text-purple-200 mb-6">All students must pay ₦20,000 by December 31, 2025</p>
-            <div className="flex justify-center gap-4">
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
-                <div className="text-xl font-bold text-white">{countdown.days}</div>
-              </div>
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
-                <div className="text-xl font-bold text-white">{countdown.hours}</div>
-              </div>
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
-                <div className="text-xl font-bold text-white">{countdown.minutes}</div>
-              </div>
-              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-4 shadow-lg">
-                <div className="text-xl font-bold text-white">{countdown.seconds}</div>
-              </div>
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 max-w-2xl w-full shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <h2 className="text-3xl font-bold text-white mb-4">Payment Deadline</h2>
+            <p className="text-blue-200 mb-8 text-lg">All students must pay ₦20,000 by December 31, 2025</p>
+            <div className="flex justify-center flex-wrap gap-4">
+              {Object.entries(countdown).map(([unit, value]) => (
+                <div key={unit} className="bg-blue-900/50 backdrop-blur rounded-2xl p-4 min-w-[100px] border border-blue-500/30">
+                  <div className="text-4xl font-bold text-white">{value}</div>
+                  <div className="text-sm text-blue-300 font-medium uppercase tracking-wider">{unit}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-6 justify-center">
+          <div className="flex flex-col md:flex-row items-center gap-6 justify-center w-full max-w-md mx-auto">
             <Link
               href="/login"
-              className="group px-6 py-3 rounded-4xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transform"
+              className="w-full group px-8 py-4 rounded-2xl bg-white text-blue-950 font-bold text-xl hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
-              <div className="flex items-center gap-3">
-                <span>🎓</span>
+              <div className="flex items-center justify-center gap-3">
                 <span>Student Portal</span>
                 <span className="group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </Link>
             <Link
               href="/tracker"
-              className="group px-6 py-3 bg-white/10 backdrop-blur-lg border-2 border-white/50 text-white rounded-4xl font-bold text-xl hover:bg-white hover:text-purple-900 transition-all duration-300 shadow-2xl hover:shadow-white/50 hover:scale-105 transform"
+              className="w-full group px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/20 text-white rounded-2xl font-bold text-xl hover:bg-white/10 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
-              <div className="flex items-center gap-3">
-                <span>📊</span>
+              <div className="flex items-center justify-center gap-3">
                 <span>Payment Tracker</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </Link>
           </div>

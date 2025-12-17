@@ -118,9 +118,9 @@ export default function UserDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+            <div className="min-h-screen flex items-center justify-center bg-blue-950">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
                     <p className="text-white text-lg">Loading...</p>
                 </div>
             </div>
@@ -156,17 +156,23 @@ export default function UserDashboard() {
     const needsDeadlinePayment = student.amountPaid < 20000;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-blue-950 text-white font-sans selection:bg-blue-500 selection:text-white pb-12">
+            {/* Ambient Background Glow */}
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[128px]"></div>
+                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[128px]"></div>
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-white">Student Dashboard</h1>
-                        <p className="text-purple-200">Welcome back, {student.fullName}!</p>
+                        <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Student Dashboard</h1>
+                        <p className="text-blue-200 text-lg">Welcome back, {student.fullName}</p>
                     </div>
                     <button
                         onClick={handleLogout}
-                        className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-lg"
+                        className="px-8 py-3 bg-white/5 border border-white/10 text-white rounded-2xl hover:bg-white/10 transition-all backdrop-blur-sm font-medium"
                     >
                         Logout
                     </button>
@@ -174,81 +180,73 @@ export default function UserDashboard() {
 
                 {/* Countdown Timer - Only show if haven't paid 20k */}
                 {needsDeadlinePayment && (
-                    <div className="bg-gradient-to-r from-red-300 to-pink-400 rounded-xl shadow-2xl p-6 mb-6 text-white">
+                    <div className="bg-gradient-to-r from-blue-900 to-blue-800 rounded-2xl shadow-xl p-8 mb-8 border border-blue-700/50">
                         <div className="text-center">
-                            <h2 className="text-2xl font-bold mb-2">⏰ Payment Deadline</h2>
-                            <p className="mb-4">Time remaining to pay ₦20,000 (December 31, 2025)</p>
-                            <div className="flex justify-center gap-4">
-                                <div className="bg-white/20 backdrop-blur rounded-lg p-4 min-w-[80px]">
-                                    <div className="text-4xl font-bold">{countdown.days}</div>
-                                    <div className="text-sm">Days</div>
-                                </div>
-                                <div className="bg-white/20 backdrop-blur rounded-lg p-4 min-w-[80px]">
-                                    <div className="text-4xl font-bold">{countdown.hours}</div>
-                                    <div className="text-sm">Hours</div>
-                                </div>
-                                <div className="bg-white/20 backdrop-blur rounded-lg p-4 min-w-[80px]">
-                                    <div className="text-4xl font-bold">{countdown.minutes}</div>
-                                    <div className="text-sm">Minutes</div>
-                                </div>
-                                <div className="bg-white/20 backdrop-blur rounded-lg p-4 min-w-[80px]">
-                                    <div className="text-4xl font-bold">{countdown.seconds}</div>
-                                    <div className="text-sm">Seconds</div>
-                                </div>
+                            <h2 className="text-2xl font-bold mb-2">Payment Deadline</h2>
+                            <p className="mb-6 text-blue-100">Time remaining to pay ₦20,000 (December 31, 2025)</p>
+                            <div className="flex justify-center flex-wrap gap-4">
+                                {Object.entries(countdown).map(([unit, value]) => (
+                                    <div key={unit} className="bg-blue-950/50 backdrop-blur rounded-xl p-4 min-w-[100px] border border-blue-500/20">
+                                        <div className="text-4xl font-bold text-white">{value}</div>
+                                        <div className="text-sm text-blue-200 capitalize">{unit}</div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* Student Info Card */}
-                <div className="bg-white/10 backdrop-blur-lg shadow-2xl rounded-xl p-6 mb-6 border border-white/20">
-                    <h2 className="text-2xl font-semibold text-white mb-4">Personal Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 mb-8 border border-white/10">
+                    <h2 className="text-2xl font-semibold text-white mb-6">Personal Information</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <div>
-                            <p className="text-sm text-purple-200">Full Name</p>
-                            <p className="text-lg font-medium text-white">{student.fullName}</p>
+                            <p className="text-sm text-blue-300 mb-1">Full Name</p>
+                            <p className="text-xl font-medium text-white">{student.fullName}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-purple-200">Email</p>
-                            <p className="text-lg font-medium text-white">{student.email}</p>
+                            <p className="text-sm text-blue-300 mb-1">Email</p>
+                            <p className="text-xl font-medium text-white">{student.email}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-purple-200">Phone Number</p>
-                            <p className="text-lg font-medium text-white">{student.phoneNumber}</p>
+                            <p className="text-sm text-blue-300 mb-1">Phone Number</p>
+                            <p className="text-xl font-medium text-white">{student.phoneNumber}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-purple-200">Course</p>
-                            <p className="text-lg font-medium text-white">{student.skill}</p>
+                            <p className="text-sm text-blue-300 mb-1">Course</p>
+                            <p className="text-xl font-medium text-white">{student.skill}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-purple-200">Class Location</p>
-                            <p className="text-lg font-medium text-white">{student.location}</p>
+                            <p className="text-sm text-blue-300 mb-1">Class Location</p>
+                            <p className="text-xl font-medium text-white">{student.location}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-purple-200">Scholarship Type</p>
-                            <p className="text-lg font-medium text-white">{student.scholarshipType}</p>
+                            <p className="text-sm text-blue-300 mb-1">Scholarship Type</p>
+                            <p className="text-xl font-medium text-white bg-blue-600/20 inline-block px-3 py-1 rounded-lg border border-blue-500/30">
+                                {student.scholarshipType}
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Payment Summary Card */}
-                <div className="bg-white/10 backdrop-blur-lg shadow-2xl rounded-xl p-6 mb-6 border border-white/20">
-                    <h2 className="text-2xl font-semibold text-white mb-4">Payment Summary</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-blue-600/30 backdrop-blur p-4 rounded-lg border border-blue-400/50">
-                            <p className="text-sm text-blue-200 font-medium">Total Fees</p>
+                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 mb-8 border border-white/10">
+                    <h2 className="text-2xl font-semibold text-white mb-6">Payment Summary</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="bg-blue-600/10 backdrop-blur p-6 rounded-2xl border border-blue-500/20">
+                            <p className="text-sm text-blue-200 font-medium mb-2">Total Fees</p>
                             <p className="text-3xl font-bold text-white">₦{student.totalFees.toLocaleString()}</p>
                         </div>
-                        <div className="bg-green-600/30 backdrop-blur p-4 rounded-lg border border-green-400/50">
-                            <p className="text-sm text-green-200 font-medium">Amount Paid</p>
+                        <div className="bg-white/5 backdrop-blur p-6 rounded-2xl border border-white/10">
+                            <p className="text-sm text-blue-200 font-medium mb-2">Amount Paid</p>
                             <p className="text-3xl font-bold text-white">₦{student.amountPaid.toLocaleString()}</p>
                         </div>
-                        <div className="bg-red-600/30 backdrop-blur p-4 rounded-lg border border-red-400/50">
-                            <p className="text-sm text-red-200 font-medium">Remaining Balance</p>
+                        <div className="bg-white/5 backdrop-blur p-6 rounded-2xl border border-white/10">
+                            <p className="text-sm text-blue-200 font-medium mb-2">Remaining Balance</p>
                             <p className="text-3xl font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
                         </div>
-                        <div className="bg-purple-600/30 backdrop-blur p-4 rounded-lg border border-purple-400/50">
-                            <p className="text-sm text-purple-200 font-medium">Payment Status</p>
+                        <div className="bg-white/5 backdrop-blur p-6 rounded-2xl border border-white/10">
+                            <p className="text-sm text-blue-200 font-medium mb-2">Payment Status</p>
                             <p className="text-3xl font-bold text-white">{getPaymentStatus()}</p>
                         </div>
                     </div>
@@ -256,48 +254,49 @@ export default function UserDashboard() {
 
                 {/* Payment Options */}
                 {student.remainingBalance > 0 && (
-                    <div className="bg-white/10 backdrop-blur-lg shadow-2xl rounded-xl p-6 mb-6 border border-white/20">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Make a Payment</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 mb-8 border border-white/10">
+                        <h2 className="text-2xl font-semibold text-white mb-6">Make a Payment</h2>
+                        <p className="text-sm text-blue-200 font-medium mb-2">Select an amount to pay:</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {getPaymentOptions().map((option, index) => (
                                 <button
                                     key={index}
                                     onClick={() => handleInitiatePayment(option.amount)}
                                     disabled={student.remainingBalance < option.amount}
-                                    className="p-6 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:scale-105"
+                                    className="group p-6 bg-white cursor-pointer text-blue-950 rounded-2xl hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                                 >
-                                    <p className="text-lg font-semibold text-white mb-2">{option.label}</p>
-                                    <p className="text-3xl font-bold text-white">₦{option.amount.toLocaleString()}</p>
+                                    <p className="text-xl font-bold mb-2 group-disabled:text-opacity-50">{option.label}</p>
+                                    <p className="text-sm font-semibold opacity-80">₦{option.amount.toLocaleString()}</p>
                                 </button>
                             ))}
                             <button
                                 onClick={() => handleInitiatePayment(student.remainingBalance)}
-                                className="p-6 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105"
+                                className="group p-6 bg-blue-600 cursor-pointer text-white rounded-2xl hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                             >
-                                <p className="text-lg font-semibold text-white mb-2">Pay Full Balance</p>
-                                <p className="text-3xl font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
+                                <p className="text-xl font-bold mb-2">Pay Full Balance</p>
+                                <p className="text-sm font-semibold opacity-90">₦{student.remainingBalance.toLocaleString()}</p>
                             </button>
                         </div>
                     </div>
                 )}
 
                 {/* Payment History */}
-                <div className="bg-white/10 backdrop-blur-lg shadow-2xl rounded-xl p-6 border border-white/20">
-                    <h2 className="text-2xl font-semibold text-white mb-4">Payment History</h2>
+                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 border border-white/10">
+                    <h2 className="text-2xl font-semibold text-white mb-6">Payment History</h2>
                     {student.paymentHistory && student.paymentHistory.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="min-w-full">
                                 <thead>
-                                    <tr className="border-b border-white/20">
-                                        <th className="px-6 py-3 text-left text-sm font-medium text-purple-200">Date</th>
-                                        <th className="px-6 py-3 text-left text-sm font-medium text-purple-200">Amount</th>
-                                        <th className="px-6 py-3 text-left text-sm font-medium text-purple-200">Status</th>
-                                        <th className="px-6 py-3 text-left text-sm font-medium text-purple-200">Reference</th>
+                                    <tr className="border-b border-white/10">
+                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Date</th>
+                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Amount</th>
+                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Status</th>
+                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Reference</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {student.paymentHistory.map((payment, index) => (
-                                        <tr key={index} className="border-b border-white/10">
+                                        <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                                             <td className="px-6 py-4 text-white">
                                                 {new Date(payment.date).toLocaleDateString()}
                                             </td>
@@ -305,14 +304,16 @@ export default function UserDashboard() {
                                                 ₦{payment.amount.toLocaleString()}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${payment.status === 'verified' ? 'bg-green-500 text-white' :
-                                                        payment.status === 'pending' ? 'bg-yellow-500 text-white' :
-                                                            'bg-red-500 text-white'
+                                                <span className={`px-4 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full ${payment.status === 'verified'
+                                                        ? 'bg-white text-blue-900'
+                                                        : payment.status === 'pending'
+                                                            ? 'bg-blue-500/20 text-blue-200 border border-blue-500/30'
+                                                            : 'bg-red-500/20 text-red-200 border border-red-500/30'
                                                     }`}>
                                                     {payment.status.toUpperCase()}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-purple-200 text-sm">
+                                            <td className="px-6 py-4 text-blue-300 text-sm font-mono">
                                                 {payment.transactionReference || 'N/A'}
                                             </td>
                                         </tr>
@@ -321,37 +322,37 @@ export default function UserDashboard() {
                             </table>
                         </div>
                     ) : (
-                        <p className="text-purple-200">No payment history yet.</p>
+                        <p className="text-blue-200 text-center py-8">No payment history yet.</p>
                     )}
                 </div>
             </div>
 
             {/* Payment Modal */}
             {showPaymentModal && paymentData && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50">
-                    <div className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-purple-500">
+                <div className="fixed inset-0 bg-blue-950/80 backdrop-blur-md overflow-y-auto h-full w-full flex items-center justify-center z-50">
+                    <div className="bg-blue-950 border border-white/10 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
                         <h3 className="text-2xl font-bold text-white mb-6">Complete Payment</h3>
-                        <div className="bg-white/10 backdrop-blur rounded-xl p-6 mb-6 border border-white/20">
-                            <p className="text-sm text-purple-200 mb-2">Amount to Pay:</p>
+                        <div className="bg-white/5 rounded-2xl p-6 mb-6 border border-white/10">
+                            <p className="text-sm text-blue-200 mb-2">Amount to Pay</p>
                             <p className="text-4xl font-bold text-white mb-4">₦{paymentAmount.toLocaleString()}</p>
-                            <p className="text-sm text-purple-200 mb-1">Payment Reference:</p>
-                            <p className="text-xs text-white font-mono bg-black/30 p-2 rounded">{paymentData.paymentReference}</p>
+                            <p className="text-sm text-blue-200 mb-2">Payment Reference</p>
+                            <p className="text-sm text-white font-mono bg-black/20 p-3 rounded-lg border border-white/5">{paymentData.paymentReference}</p>
                         </div>
                         <div className="space-y-4">
                             <button
                                 onClick={handlePayNow}
-                                className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 font-semibold text-lg shadow-xl transform hover:scale-105 transition-all"
+                                className="w-full px-6 py-4 bg-white text-blue-950 rounded-2xl hover:bg-blue-50 font-bold text-lg shadow-lg transform hover:-translate-y-1 transition-all"
                             >
                                 Pay with Monnify
                             </button>
                             <button
                                 onClick={() => setShowPaymentModal(false)}
-                                className="w-full px-6 py-4 bg-white/10 text-white rounded-xl hover:bg-white/20 font-semibold border border-white/30 transition-all"
+                                className="w-full px-6 py-4 bg-transparent text-white rounded-2xl hover:bg-white/5 font-semibold border border-white/10 transition-all"
                             >
                                 Cancel
                             </button>
                         </div>
-                        <p className="text-xs text-purple-200 mt-4 text-center">
+                        <p className="text-xs text-blue-300 mt-6 text-center">
                             You'll be redirected to Monnify's secure payment page
                         </p>
                     </div>

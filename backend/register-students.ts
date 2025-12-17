@@ -57,7 +57,7 @@ Half Funded,Hope,hopeoveze14hopeoveze14@gmail.com,08025506579,Web Development,On
 Half Funded,Adekoya Ademiitura,ademiituraadekoya23@gmail.com,08078625436,Web Development,Pysically
 Half Funded,Gabriel Gift,giftgabrielehi@gmail.com,09060680875,Web Development,Pysically
 Half Funded,Elvis,elvismichael560@gmail.com,08102522960,UI/UX Design,Pysically
-Half Funded,Oluwasola Feranmi,feranmioluwasola18@gmail.com,,Web Development,Pysically
+Half Funded,Oluwasola Feranmi,feranmioluwasola18@gmail.com,0800000000,Web Development,Pysically
 Half Funded,Ayobami Akomolafe,aymajesty12@gmail.com,08146482877,Web Development,Pysically
 Half Funded,Osamede Gideon,osamedegideon8@gmail.com,08135699491,Smart Contract,Online
 Half Funded,Abiri Godwin,godwinabiri456@gmail.com,08135699491,Web Development,Pysically
@@ -130,7 +130,7 @@ async function registerStudent(student: Student): Promise<RegistrationResult> {
     skill: student.skill,
     location: student.location,
     scholarshipType: student.scholarshipType,
-    password: `${student.email.split('@')[0] + student.fullName.split(' ')[0]}`
+    password: `${student.email.split('@')[0]}`
   };
 
   const curlCommand = `curl -X POST ${API_URL} -H "Content-Type: application/json" -d "${JSON.stringify(payload).replace(/"/g, '\\"')}"`;
