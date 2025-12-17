@@ -262,22 +262,22 @@ export default function UserDashboard() {
                 <div className="bg-white/10 backdrop-blur-lg shadow-2xl rounded-xl p-6 mb-6 border border-white/20">
                     <h2 className="text-2xl font-semibold text-white mb-4">Payment Summary</h2>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* <div className="bg-blue-600/30 backdrop-blur p-4 rounded-lg border border-blue-400/50"> */}
+                        <div>
                             <p className="text-sm text-blue-300 mb-1">Total Fees</p>
                             <p className="text-3xl font-bold text-white">₦{student.totalFees.toLocaleString()}</p>
-                        {/* </div> */}
-                        {/* <div className="bg-green-600/30 backdrop-blur p-4 rounded-lg border border-green-400/50"> */}
+                        </div>
+                        <div>
                             <p className="text-sm text-blue-300 mb-1">Amount Paid</p>
                             <p className="text-3xl font-bold text-white">₦{student.amountPaid.toLocaleString()}</p>
-                        {/* </div> */}
-                        {/* <div className="bg-red-600/30 backdrop-blur p-4 rounded-lg border border-red-400/50"> */}
+                        </div>
+                        <div>
                             <p className="text-sm text-blue-300 mb-1">Remaining Balance</p>
                             <p className="text-3xl font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
-                        {/* </div> */}
-                        {/* <div className="bg-purple-600/30 backdrop-blur p-4 rounded-lg border border-purple-400/50"> */}
+                        </div>
+                        <div>
                             <p className="text-sm text-blue-300 mb-1">Payment Status</p>
                             <p className="text-3xl font-bold text-white">{getPaymentStatus()}</p>
-                        {/* </div> */}
+                        </div>
                     </div>
                 </div>
 
