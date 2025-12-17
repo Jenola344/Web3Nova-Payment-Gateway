@@ -265,19 +265,19 @@ export default function UserDashboard() {
                         {/* <div className="bg-blue-600/30 backdrop-blur p-4 rounded-lg border border-blue-400/50"> */}
                             <p className="text-sm text-blue-300 mb-1">Total Fees</p>
                             <p className="text-3xl font-bold text-white">₦{student.totalFees.toLocaleString()}</p>
-                        </div>
+                        {/* </div> */}
                         {/* <div className="bg-green-600/30 backdrop-blur p-4 rounded-lg border border-green-400/50"> */}
                             <p className="text-sm text-blue-300 mb-1">Amount Paid</p>
                             <p className="text-3xl font-bold text-white">₦{student.amountPaid.toLocaleString()}</p>
-                        </div>
+                        {/* </div> */}
                         {/* <div className="bg-red-600/30 backdrop-blur p-4 rounded-lg border border-red-400/50"> */}
                             <p className="text-sm text-blue-300 mb-1">Remaining Balance</p>
                             <p className="text-3xl font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
-                        </div>
+                        {/* </div> */}
                         {/* <div className="bg-purple-600/30 backdrop-blur p-4 rounded-lg border border-purple-400/50"> */}
                             <p className="text-sm text-blue-300 mb-1">Payment Status</p>
                             <p className="text-3xl font-bold text-white">{getPaymentStatus()}</p>
-                        </div>
+                        {/* </div> */}
                     </div>
                 </div>
 
