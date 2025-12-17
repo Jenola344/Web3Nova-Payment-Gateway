@@ -138,17 +138,17 @@ export default function UserDashboard() {
     const getPaymentOptions = () => {
         if (student.scholarshipType === 'Fully Funded') {
             return [
-                { label: 'Full Payment - ₦20000', amount: 20000 }
+                { label: 'Full Payment', amount: 20000 }
             ];
         } else if (student.scholarshipType === 'Half Funded') {
             return [
-                { label: 'First Payment - ₦20000', amount: 20000 },
-                { label: 'Second Payment - ₦20000', amount: 20000 },
-                { label: 'Final Payment - ₦10000', amount: 10000 }
+                { label: 'First Payment', amount: 20000 },
+                { label: 'Second Payment', amount: 20000 },
+                { label: 'Final Payment', amount: 10000 }
             ];
         } else {
             return [
-                { label: 'Full Payment - ₦100000', amount: 100000 }
+                { label: 'Full Payment', amount: 100000 }
             ];
         }
     };
@@ -163,66 +163,109 @@ export default function UserDashboard() {
                 <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[128px]"></div>
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
+                <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Student Dashboard</h1>
-                        <p className="text-blue-200 text-lg">Welcome back, {student.fullName}</p>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-1">Student Dashboard</h1>
+                        <p className="text-blue-200 text-sm md:text-base">Welcome, {student.fullName.split(' ')[0]}</p>
                     </div>
                     <button
                         onClick={handleLogout}
-                        className="px-8 py-3 bg-white/5 border border-white/10 text-white rounded-2xl hover:bg-white/10 transition-all backdrop-blur-sm font-medium"
+                        className="p-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm group"
+                        aria-label="Logout"
                     >
-                        Logout
+                        <svg className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
                     </button>
                 </div>
 
-                {/* Countdown Timer - Only show if haven't paid 20k */}
+                {/* Countdown Timer - Minimalist Digital Clock */}
                 {needsDeadlinePayment && (
-                    <div className="bg-gradient-to-r from-blue-900 to-blue-800 rounded-2xl shadow-xl p-8 mb-8 border border-blue-700/50">
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold mb-2">Payment Deadline</h2>
-                            <p className="mb-6 text-blue-100">Time remaining to pay ₦20,000 (December 31, 2025)</p>
-                            <div className="flex justify-center flex-wrap gap-4">
-                                {Object.entries(countdown).map(([unit, value]) => (
-                                    <div key={unit} className="bg-blue-950/50 backdrop-blur rounded-xl p-4 min-w-[100px] border border-blue-500/20">
-                                        <div className="text-4xl font-bold text-white">{value}</div>
-                                        <div className="text-sm text-blue-200 capitalize">{unit}</div>
+                    <div className="flex justify-center mb-8">
+                        <div className="bg-blue-900/40 backdrop-blur-md rounded-xl p-4 border border-blue-700/30 flex items-center gap-4">
+                            {Object.entries(countdown).map(([unit, value], idx) => (
+                                <div key={unit} className="flex items-center">
+                                    <div className="text-center">
+                                        <div className="text-xl md:text-2xl font-mono font-bold text-white leading-none">
+                                            {value.toString().padStart(2, '0')}
+                                        </div>
+                                        <div className="text-[10px] text-blue-300 uppercase tracking-wider mt-1">{unit}</div>
                                     </div>
-                                ))}
+                                    {idx < 3 && <div className="text-blue-500/50 text-xl font-bold mx-2 md:mx-3 -mt-3">:</div>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Payment Options - Reordered for Mobile */}
+                {student.remainingBalance > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-lg md:text-xl font-semibold text-white mb-4">Make a Payment</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {getPaymentOptions().map((option, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 flex flex-row items-center justify-between"
+                                >
+                                    <div>
+                                        <p className="text-sm text-blue-200 font-medium mb-1">{option.label}</p>
+                                        <p className="text-lg font-bold text-white">₦{option.amount.toLocaleString()}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInitiatePayment(option.amount)}
+                                        disabled={student.remainingBalance < option.amount}
+                                        className="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transition-all"
+                                    >
+                                        Pay
+                                    </button>
+                                </div>
+                            ))}
+                            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 flex flex-row items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-blue-200 font-medium mb-1">Full Balance</p>
+                                    <p className="text-lg font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
+                                </div>
+                                <button
+                                    onClick={() => handleInitiatePayment(student.remainingBalance)}
+                                    className="px-6 py-2 bg-white text-blue-950 text-sm font-bold rounded-xl hover:bg-blue-50 shadow-lg transition-all"
+                                >
+                                    Pay
+                                </button>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* Student Info Card */}
-                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 mb-8 border border-white/10">
-                    <h2 className="text-2xl font-semibold text-white mb-6">Personal Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-6 md:p-8 mb-6 border border-white/10">
+                    <h2 className="text-lg md:text-xl font-semibold text-white mb-4 md:mb-6">Personal Information</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                         <div>
-                            <p className="text-sm text-blue-300 mb-1">Full Name</p>
-                            <p className="text-xl font-medium text-white">{student.fullName}</p>
+                            <p className="text-xs md:text-sm text-blue-300 mb-1">Full Name</p>
+                            <p className="text-base md:text-lg font-medium text-white">{student.fullName}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-blue-300 mb-1">Email</p>
-                            <p className="text-xl font-medium text-white">{student.email}</p>
+                            <p className="text-xs md:text-sm text-blue-300 mb-1">Email</p>
+                            <p className="text-base md:text-lg font-medium text-white break-all">{student.email}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-blue-300 mb-1">Phone Number</p>
-                            <p className="text-xl font-medium text-white">{student.phoneNumber}</p>
+                            <p className="text-xs md:text-sm text-blue-300 mb-1">Phone Number</p>
+                            <p className="text-base md:text-lg font-medium text-white">{student.phoneNumber}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-blue-300 mb-1">Course</p>
-                            <p className="text-xl font-medium text-white">{student.skill}</p>
+                            <p className="text-xs md:text-sm text-blue-300 mb-1">Course</p>
+                            <p className="text-base md:text-lg font-medium text-white">{student.skill}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-blue-300 mb-1">Class Location</p>
-                            <p className="text-xl font-medium text-white">{student.location}</p>
+                            <p className="text-xs md:text-sm text-blue-300 mb-1">Class Location</p>
+                            <p className="text-base md:text-lg font-medium text-white">{student.location}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-blue-300 mb-1">Scholarship Type</p>
-                            <p className="text-xl font-medium text-white bg-blue-600/20 inline-block px-3 py-1 rounded-lg border border-blue-500/30">
+                            <p className="text-xs md:text-sm text-blue-300 mb-1">Scholarship Type</p>
+                            <p className="text-sm md:text-base font-medium text-white bg-blue-600/20 inline-block px-3 py-1 rounded-lg border border-blue-500/30">
                                 {student.scholarshipType}
                             </p>
                         </div>
@@ -230,90 +273,62 @@ export default function UserDashboard() {
                 </div>
 
                 {/* Payment Summary Card */}
-                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 mb-8 border border-white/10">
-                    <h2 className="text-2xl font-semibold text-white mb-6">Payment Summary</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div className="bg-blue-600/10 backdrop-blur p-6 rounded-2xl border border-blue-500/20">
-                            <p className="text-sm text-blue-200 font-medium mb-2">Total Fees</p>
-                            <p className="text-3xl font-bold text-white">₦{student.totalFees.toLocaleString()}</p>
+                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-6 md:p-8 mb-8 border border-white/10">
+                    <h2 className="text-lg md:text-xl font-semibold text-white mb-4 md:mb-6">Payment Summary</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+                        <div className="bg-blue-600/10 backdrop-blur p-4 md:p-6 rounded-2xl border border-blue-500/20">
+                            <p className="text-xs md:text-sm text-blue-200 font-medium mb-1 md:mb-2">Total Fees</p>
+                            <p className="text-2xl md:text-3xl font-bold text-white">₦{student.totalFees.toLocaleString()}</p>
                         </div>
-                        <div className="bg-white/5 backdrop-blur p-6 rounded-2xl border border-white/10">
-                            <p className="text-sm text-blue-200 font-medium mb-2">Amount Paid</p>
-                            <p className="text-3xl font-bold text-white">₦{student.amountPaid.toLocaleString()}</p>
+                        <div className="bg-white/5 backdrop-blur p-4 md:p-6 rounded-2xl border border-white/10">
+                            <p className="text-xs md:text-sm text-blue-200 font-medium mb-1 md:mb-2">Amount Paid</p>
+                            <p className="text-2xl md:text-3xl font-bold text-white">₦{student.amountPaid.toLocaleString()}</p>
                         </div>
-                        <div className="bg-white/5 backdrop-blur p-6 rounded-2xl border border-white/10">
-                            <p className="text-sm text-blue-200 font-medium mb-2">Remaining Balance</p>
-                            <p className="text-3xl font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
+                        <div className="bg-white/5 backdrop-blur p-4 md:p-6 rounded-2xl border border-white/10">
+                            <p className="text-xs md:text-sm text-blue-200 font-medium mb-1 md:mb-2">Remaining Balance</p>
+                            <p className="text-2xl md:text-3xl font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
                         </div>
-                        <div className="bg-white/5 backdrop-blur p-6 rounded-2xl border border-white/10">
-                            <p className="text-sm text-blue-200 font-medium mb-2">Payment Status</p>
-                            <p className="text-3xl font-bold text-white">{getPaymentStatus()}</p>
+                        <div className="bg-white/5 backdrop-blur p-4 md:p-6 rounded-2xl border border-white/10">
+                            <p className="text-xs md:text-sm text-blue-200 font-medium mb-1 md:mb-2">Payment Status</p>
+                            <p className="text-2xl md:text-3xl font-bold text-white">{getPaymentStatus()}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Payment Options */}
-                {student.remainingBalance > 0 && (
-                    <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 mb-8 border border-white/10">
-                        <h2 className="text-2xl font-semibold text-white mb-6">Make a Payment</h2>
-                        <p className="text-sm text-blue-200 font-medium mb-2">Select an amount to pay:</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {getPaymentOptions().map((option, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleInitiatePayment(option.amount)}
-                                    disabled={student.remainingBalance < option.amount}
-                                    className="group p-6 bg-white cursor-pointer text-blue-950 rounded-2xl hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                                >
-                                    <p className="text-xl font-bold mb-2 group-disabled:text-opacity-50">{option.label}</p>
-                                    <p className="text-sm font-semibold opacity-80">₦{option.amount.toLocaleString()}</p>
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => handleInitiatePayment(student.remainingBalance)}
-                                className="group p-6 bg-blue-600 cursor-pointer text-white rounded-2xl hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                            >
-                                <p className="text-xl font-bold mb-2">Pay Full Balance</p>
-                                <p className="text-sm font-semibold opacity-90">₦{student.remainingBalance.toLocaleString()}</p>
-                            </button>
-                        </div>
-                    </div>
-                )}
-
                 {/* Payment History */}
-                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-8 border border-white/10">
-                    <h2 className="text-2xl font-semibold text-white mb-6">Payment History</h2>
+                <div className="bg-white/5 backdrop-blur-xl shadow-xl rounded-2xl p-6 md:p-8 border border-white/10">
+                    <h2 className="text-lg md:text-xl font-semibold text-white mb-6">Payment History</h2>
                     {student.paymentHistory && student.paymentHistory.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="min-w-full">
                                 <thead>
                                     <tr className="border-b border-white/10">
-                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Date</th>
-                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Amount</th>
-                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Status</th>
-                                        <th className="px-6 py-4 text-left text-sm font-medium text-blue-200">Reference</th>
+                                        <th className="px-6 py-4 text-left text-xs md:text-sm font-medium text-blue-200">Date</th>
+                                        <th className="px-6 py-4 text-left text-xs md:text-sm font-medium text-blue-200">Amount</th>
+                                        <th className="px-6 py-4 text-left text-xs md:text-sm font-medium text-blue-200">Status</th>
+                                        <th className="px-6 py-4 text-left text-xs md:text-sm font-medium text-blue-200">Reference</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {student.paymentHistory.map((payment, index) => (
                                         <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                            <td className="px-6 py-4 text-white">
+                                            <td className="px-6 py-4 text-white text-xs md:text-base">
                                                 {new Date(payment.date).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 text-white font-semibold">
+                                            <td className="px-6 py-4 text-white font-semibold text-xs md:text-base">
                                                 ₦{payment.amount.toLocaleString()}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-4 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full ${payment.status === 'verified'
-                                                        ? 'bg-white text-blue-900'
-                                                        : payment.status === 'pending'
-                                                            ? 'bg-blue-500/20 text-blue-200 border border-blue-500/30'
-                                                            : 'bg-red-500/20 text-red-200 border border-red-500/30'
+                                                <span className={`px-3 py-1 inline-flex text-[10px] md:text-xs leading-5 font-bold rounded-full ${payment.status === 'verified'
+                                                    ? 'bg-white text-blue-900'
+                                                    : payment.status === 'pending'
+                                                        ? 'bg-blue-500/20 text-blue-200 border border-blue-500/30'
+                                                        : 'bg-red-500/20 text-red-200 border border-red-500/30'
                                                     }`}>
                                                     {payment.status.toUpperCase()}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-blue-300 text-sm font-mono">
+                                            <td className="px-6 py-4 text-blue-300 text-xs md:text-sm font-mono">
                                                 {payment.transactionReference || 'N/A'}
                                             </td>
                                         </tr>
@@ -322,7 +337,7 @@ export default function UserDashboard() {
                             </table>
                         </div>
                     ) : (
-                        <p className="text-blue-200 text-center py-8">No payment history yet.</p>
+                        <p className="text-blue-200 text-center py-8 text-sm">No payment history yet.</p>
                     )}
                 </div>
             </div>

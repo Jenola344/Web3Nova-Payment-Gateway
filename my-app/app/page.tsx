@@ -113,19 +113,16 @@ export default function Home() {
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4">
-        <div className="max-w-6xl w-full text-center flex flex-col items-center gap-12">
+        <div className="max-w-6xl w-full text-center flex flex-col items-center gap-5">
           <div>
             <div className="flex justify-center mb-6">
               <div className="w-24 h-24 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
                 <span className="text-4xl">🚀</span>
               </div>
             </div>
-            <h1 className="text-5xl md:text-8xl font-black tracking-tight text-white mb-6 animate-fade-in drop-shadow-lg">
+            <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white mb-6 animate-fade-in drop-shadow-lg">
               Web3Nova
             </h1>
-            <p className="text-blue-200 text-xl md:text-2xl max-w-2xl mx-auto">
-              The next generation payment gateway for the future of education.
-            </p>
           </div>
 
           {/* Countdown Timer */}
@@ -146,16 +143,15 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center gap-6 justify-center w-full max-w-md mx-auto">
             <Link
               href="/login"
-              className="w-full group px-8 py-4 rounded-2xl bg-white text-blue-950 font-bold text-xl hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              className="w-full group px-8 py-4 rounded-2xl bg-white text-blue-950 font-bold text-xs hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
               <div className="flex items-center justify-center gap-3">
                 <span>Student Portal</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </Link>
             <Link
               href="/tracker"
-              className="w-full group px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/20 text-white rounded-2xl font-bold text-xl hover:bg-white/10 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              className="w-full group px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/20 text-white rounded-2xl font-bold text-xs hover:bg-white/10 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
               <div className="flex items-center justify-center gap-3">
                 <span>Payment Tracker</span>
