@@ -79,7 +79,8 @@ Half Funded,Akintayo Morzuq Oyinlola,morzuqakintayo@gmail.com,07047541839,UI/UX 
 Half Funded,Obaremo Elijah,elijahopemipo60@gmail.com,08137887107,Web Development,Pysically
 Half Funded,Kolawole Toheeb Adeola,adeolakolawole2002@gmail.com,07042927291,Web Development,Pysically
 Half Funded,Umoh Isaac,issacujay@gmail.com,09130059663,Web Development,Physically
-Half Funded,Timothy,Timothyolamideji@gmail.com,08145011894,Web Development,Pysically`;
+Half Funded,Timothy,Timothyolamideji@gmail.com,08145011894,Web Development,Pysically
+Half Funded,Olanipekun Abdulmateen Oluwatimileyin,olanipekunabdulmateen6@gmail.com,08145224987,Web Development,Pysically`;
 
 const API_URL = 'http://localhost:5000/auth/register/student';
 
@@ -97,6 +98,7 @@ interface RegistrationResult {
   student: string;
   response?: string;
   error?: string;
+  skipped?: boolean;
 }
 
 // Parse CSV
@@ -137,8 +139,21 @@ async function registerStudent(student: Student): Promise<RegistrationResult> {
 
   try {
     const { stdout } = await execPromise(curlCommand);
+
+    // Parse the response to check for duplicate errors
+    try {
+      const responseJson = JSON.parse(stdout);
+      if (!responseJson.success && responseJson.message && responseJson.message.includes('already exists')) {
+        return { success: false, student: student.fullName, error: responseJson.message, skipped: true };
+      }
+    } catch (e) {
+      // Ignore JSON parse errors, just proceed with raw output if needed, or handle standard failure
+    }
+
     return { success: true, student: student.fullName, response: stdout };
   } catch (error: any) {
+    // If curl itself fails (non-200 might not throw in exec unless it returns non-zero exit code, 
+    // but curl output often contains the JSON error even on 400/500 if not using -f)
     return { success: false, student: student.fullName, error: error.message };
   }
 }
@@ -146,30 +161,34 @@ async function registerStudent(student: Student): Promise<RegistrationResult> {
 // Main function
 async function registerAllStudents() {
   console.log('Starting student registration...\n');
-  
+
   const students = parseCSV(csvData);
   console.log(`Found ${students.length} students to register\n`);
 
   let successCount = 0;
   let failCount = 0;
+  let skipCount = 0;
 
   for (let i = 0; i < students.length; i++) {
     const student = students[i];
     console.log(`[${i + 1}/${students.length}] Registering: ${student.fullName}...`);
-    
+
     const result = await registerStudent(student);
-    
+
     if (result.success) {
       successCount++;
       console.log(`✓ Success: ${result.student}`);
       console.log(`Response: ${result.response}`);
+    } else if (result.skipped) {
+      skipCount++;
+      console.log(`⚠ Skipped: ${result.student} - ${result.error}`);
     } else {
       failCount++;
       console.log(`✗ Failed: ${result.student} - ${result.error}`);
     }
-    
+
     console.log('---');
-    
+
     // Add small delay to avoid overwhelming the server
     await new Promise(resolve => setTimeout(resolve, 500));
   }
@@ -177,6 +196,7 @@ async function registerAllStudents() {
   console.log('\n=== Registration Complete ===');
   console.log(`Total: ${students.length}`);
   console.log(`Success: ${successCount}`);
+  console.log(`Skipped: ${skipCount}`);
   console.log(`Failed: ${failCount}`);
 }
 
