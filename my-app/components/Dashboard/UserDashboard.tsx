@@ -142,13 +142,14 @@ export default function UserDashboard() {
             ];
         } else if (student.scholarshipType === 'Half Funded') {
             return [
-                { label: 'First Payment', amount: 20000 },
-                { label: 'Second Payment', amount: 20000 },
-                { label: 'Final Payment', amount: 10000 }
+                { label: 'Initial Payment', amount: 20000 },
+                { label: 'Second Payment', amount: 30000 },
+                { label: 'Full Payment', amount: 50000 }
             ];
         } else {
+            // Default logic or other types
             return [
-                { label: 'Full Payment', amount: 100000 }
+                { label: 'Full Payment', amount: student.remainingBalance }
             ];
         }
     };
@@ -223,18 +224,6 @@ export default function UserDashboard() {
                                     </button>
                                 </div>
                             ))}
-                            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 flex flex-row items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-blue-200 font-medium mb-1">Full Balance</p>
-                                    <p className="text-lg font-bold text-white">₦{student.remainingBalance.toLocaleString()}</p>
-                                </div>
-                                <button
-                                    onClick={() => handleInitiatePayment(student.remainingBalance)}
-                                    className="px-6 py-2 bg-white text-blue-950 text-sm font-bold rounded-xl hover:bg-blue-50 shadow-lg transition-all"
-                                >
-                                    Pay
-                                </button>
-                            </div>
                         </div>
                     </div>
                 )}

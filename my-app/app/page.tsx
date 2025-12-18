@@ -126,15 +126,22 @@ export default function Home() {
           </div>
 
           {/* Countdown Timer */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 max-w-2xl w-full shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <h2 className="text-3xl font-bold text-white mb-4">Payment Deadline</h2>
-            <p className="text-blue-200 mb-8 text-lg">All students must pay ₦20,000 by December 31, 2025</p>
-            <div className="flex justify-center flex-wrap gap-4">
-              {Object.entries(countdown).map(([unit, value]) => (
-                <div key={unit} className="bg-blue-900/50 backdrop-blur rounded-2xl p-4 min-w-[100px] border border-blue-500/30">
-                  <div className="text-4xl font-bold text-white">{value}</div>
-                  <div className="text-sm text-blue-300 font-medium uppercase tracking-wider">{unit}</div>
+          <div className="flex flex-col items-center gap-4 mb-4">
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-white">Payment Deadline</h2>
+              <p className="text-blue-200 text-sm">December 31, 2025</p>
+            </div>
+
+            <div className="bg-blue-900/40 backdrop-blur-md rounded-xl p-4 border border-blue-700/30 flex items-center gap-4">
+              {Object.entries(countdown).map(([unit, value], idx) => (
+                <div key={unit} className="flex items-center">
+                  <div className="text-center">
+                    <div className="text-xl md:text-2xl font-mono font-bold text-white leading-none">
+                      {value.toString().padStart(2, '0')}
+                    </div>
+                    <div className="text-[10px] text-blue-300 uppercase tracking-wider mt-1">{unit}</div>
+                  </div>
+                  {idx < 3 && <div className="text-blue-500/50 text-xl font-bold mx-2 md:mx-3 -mt-3">:</div>}
                 </div>
               ))}
             </div>
