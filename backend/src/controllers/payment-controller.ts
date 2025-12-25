@@ -337,7 +337,16 @@ export const checkPaymentStatus = async (req: AuthRequest, res: Response) => {
 // Get payment tracker (public)
 export const getPaymentTracker = async (req: AuthRequest, res: Response) => {
   try {
-    const students = await Student.find().select('fullName email skill scholarshipType totalFees amountPaid remainingBalance');
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const students = await Student.find()
+      .select('fullName email skill scholarshipType totalFees amountPaid remainingBalance')
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Student.countDocuments();
 
     const paymentStatus = students.map(student => {
       let status = 'Not Paid';
@@ -361,7 +370,12 @@ export const getPaymentTracker = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      students: paymentStatus
+      students: paymentStatus,
+      pagination: {
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      }
     });
 
   } catch (error: any) {
@@ -431,6 +445,57 @@ export const updateStudentPayment = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Server error while updating payment'
+    });
+  }
+};
+
+// Delete pending payment
+export const deletePayment = async (req: AuthRequest, res: Response) => {
+  try {
+    const studentId = req.user?.id;
+    const { paymentReference } = req.params;
+
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    const paymentIndex = student.paymentHistory.findIndex(
+      p => p.transactionReference === paymentReference || p.monnifyReference === paymentReference
+    );
+
+    if (paymentIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found'
+      });
+    }
+
+    if (student.paymentHistory[paymentIndex].status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Only pending payments can be cancelled'
+      });
+    }
+
+    // Remove payment
+    student.paymentHistory.splice(paymentIndex, 1);
+    await student.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment cancelled successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Delete payment error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while cancelling payment'
     });
   }
 };

@@ -43,3 +43,26 @@ export interface PaymentStatus {
   remainingBalance: number;
   status: string;
 }
+
+export interface Task {
+  _id: string;
+  title: string;
+  description: string;
+  deadline: string;
+  assignedStudents: string[];
+  status: 'active' | 'archived';
+}
+
+export interface Submission {
+  _id: string;
+  task: string;
+  student: {
+    _id: string;
+    fullName: string;
+    email: string;
+  };
+  content: string;
+  submittedAt: string;
+  grade?: string;
+  feedback?: string;
+}

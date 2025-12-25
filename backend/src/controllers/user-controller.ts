@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../types/index';
 import Student from '../models/Student';
+import bcrypt from 'bcryptjs';
 
 // Get student profile
 export const getStudentProfile = async (req: AuthRequest, res: Response) => {
@@ -33,12 +34,27 @@ export const getStudentProfile = async (req: AuthRequest, res: Response) => {
 // Get all students (Admin only)
 export const getAllStudents = async (req: AuthRequest, res: Response) => {
   try {
-    const students = await Student.find().select('-password').sort({ createdAt: -1 });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const students = await Student.find()
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Student.countDocuments();
 
     return res.status(200).json({
       success: true,
       students,
-      count: students.length
+      pagination: {
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+        hasMore: page * limit < total
+      }
     });
 
   } catch (error: any) {
@@ -113,6 +129,121 @@ export const updateStudentProfile = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Server error while updating profile'
+    });
+  }
+};
+
+// Create new student (Admin only)
+export const createStudent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { fullName, email, phoneNumber, skill, location, scholarshipType, password } = req.body;
+
+    // Check if student already exists
+    const existingStudent = await Student.findOne({ email });
+    if (existingStudent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student with this email already exists'
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Calculate fees based on scholarship type
+    let totalFees = 100000;
+    let remainingBalance = 100000;
+
+    if (scholarshipType === 'Fully Funded') { // Fully funded paying 20k as per existing logic
+      totalFees = 20000;
+      remainingBalance = 20000;
+    } else if (scholarshipType === 'Half Funded') {
+      totalFees = 50000;
+      remainingBalance = 50000;
+    } else if (scholarshipType === 'Full Payment') {
+      totalFees = 100000;
+      remainingBalance = 100000;
+    }
+
+    // Create new student
+    const student = await Student.create({
+      fullName,
+      email,
+      phoneNumber,
+      skill,
+      location,
+      scholarshipType,
+      totalFees,
+      amountPaid: 0,
+      remainingBalance,
+      password: hashedPassword,
+      paymentHistory: []
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Student created successfully',
+      student: {
+        _id: student._id,
+        fullName: student.fullName,
+        email: student.email
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Create student error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while creating student'
+    });
+  }
+};
+
+// Update student (Admin - Full Access)
+export const updateStudent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { fullName, email, phoneNumber, skill, location, scholarshipType } = req.body;
+
+    const student = await Student.findById(id);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    if (fullName) student.fullName = fullName;
+    if (email) student.email = email;
+    if (phoneNumber) student.phoneNumber = phoneNumber;
+    if (skill) student.skill = skill;
+    if (location) student.location = location;
+    if (scholarshipType) {
+      student.scholarshipType = scholarshipType;
+      // Recalculate fees if scholarship changes? 
+      // For now, let's assuming manual fee adjustment via updatePayment if needed, or basic logic:
+      if (scholarshipType === 'Fully Funded') student.totalFees = 20000;
+      else if (scholarshipType === 'Half Funded') student.totalFees = 50000;
+      else student.totalFees = 100000;
+
+      // Adjust remaining balance based on new total and already paid
+      student.remainingBalance = Math.max(0, student.totalFees - student.amountPaid);
+    }
+
+    await student.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Student updated successfully',
+      student
+    });
+
+  } catch (error: any) {
+    console.error('Update student error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while updating student'
     });
   }
 };

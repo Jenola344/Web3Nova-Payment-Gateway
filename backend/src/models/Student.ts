@@ -36,4 +36,9 @@ const StudentSchema = new Schema<IStudent>(
   }
 );
 
-export default mongoose.model<IStudent>('Student', StudentSchema);
+// Indexing for performance
+StudentSchema.index({ 'paymentHistory.transactionReference': 1 });
+StudentSchema.index({ 'paymentHistory.monnifyReference': 1 }); // Also useful
+
+const Student = mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema);
+export default Student;

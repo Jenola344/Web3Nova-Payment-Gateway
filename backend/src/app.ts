@@ -6,6 +6,7 @@ import { generalLimiter } from './middleware/rate-limiter';
 import authRoutes from './routes/auth';
 import paymentRoutes from './routes/payments';
 import userRoutes from './routes/user';
+import taskRoutes from './routes/tasks';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use('/auth', authRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/user', userRoutes);
+app.use('/tasks', taskRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -5,7 +5,8 @@ import {
   verifyPayment,
   getPaymentTracker,
   updateStudentPayment,
-  checkPaymentStatus
+  checkPaymentStatus,
+  deletePayment
 } from '../controllers/payment-controller';
 import { authenticate, authorizeStudent, authorizeAdmin } from '../middleware/authmiddleware';
 import { paymentLimiter } from '../middleware/rate-limiter';
@@ -15,6 +16,7 @@ const router = express.Router();
 // Student routes
 router.post('/initiate', authenticate, authorizeStudent, paymentLimiter, initiatePayment);
 router.get('/status/:paymentReference', authenticate, authorizeStudent, checkPaymentStatus);
+router.delete('/:paymentReference', authenticate, authorizeStudent, deletePayment);
 
 // Webhook route (no auth - Monnify calls this)
 router.post('/webhook/monnify', monnifyWebhook);
