@@ -18,21 +18,23 @@ export default function Login() {
         setLoading(true);
 
         try {
-        const response = await api.login(email, password, role);
-        
-        if (response.success) {
-            if (role === 'student') {
-            router.push('/dashboard');
+            const response = await api.login(email, password, role);
+            
+            if (response.success) {
+                if (role === 'student') {
+                router.push('/dashboard');
+                } else {
+                router.push('/admin');
+                }
             } else {
-            router.push('/admin');
+                setError(response.message || 'Login failed');
             }
-        } else {
-            setError(response.message || 'Login failed');
-        }
         } catch (err) {
-        setError('An error occurred. Please try again.');
+            if(err instanceof Error){
+                setError(err.message);
+            }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
