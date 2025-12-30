@@ -8,16 +8,53 @@ export default function PaymentTracker() {
     const [students, setStudents] = useState<PaymentStatus[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [stats, setStats] = useState({
+        totalStudents: 0,
+        fullyPaid: 0,
+        partiallyPaid: 0,
+        notPaid: 0
+    });
 
     useEffect(() => {
-        fetchPaymentTracker();
+        fetchStats();
     }, []);
 
-    const fetchPaymentTracker = async () => {
+    useEffect(() => {
+        fetchPaymentTracker(currentPage, searchTerm);
+    }, [currentPage]);
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentPage(1); // Reset to page 1 on search
+            fetchPaymentTracker(1, searchTerm);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    const fetchStats = async () => {
         try {
-            const response = await api.getPaymentTracker();
+            const response = await api.getDashboardStats();
+            if (response.success) {
+                setStats(response.stats);
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    };
+
+    const fetchPaymentTracker = async (page: number, search: string) => {
+        setLoading(true);
+        try {
+            const response = await api.getPaymentTracker(page, 10, search);
             if (response.success) {
                 setStudents(response.students);
+                if (response.pagination) {
+                    setTotalPages(response.pagination.totalPages);
+                }
             }
         } catch (error) {
             console.error('Error fetching payment tracker:', error);
@@ -25,12 +62,6 @@ export default function PaymentTracker() {
             setLoading(false);
         }
     };
-
-    const filteredStudents = students.filter(student =>
-        student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.skill.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -45,7 +76,29 @@ export default function PaymentTracker() {
         }
     };
 
-    if (loading) {
+    const PaginationControls = () => (
+        <div className="flex justify-center items-center gap-4 mt-8">
+            <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white/5 rounded-lg disabled:opacity-50 hover:bg-white/10 transition-all font-medium border border-white/10 text-white"
+            >
+                Previous
+            </button>
+            <span className="text-blue-200">
+                Page <span className="font-bold text-white">{currentPage}</span> of <span className="font-bold text-white">{totalPages || 1}</span>
+            </span>
+            <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white/5 rounded-lg disabled:opacity-50 hover:bg-white/10 transition-all font-medium border border-white/10 text-white"
+            >
+                Next
+            </button>
+        </div>
+    );
+
+    if (loading && students.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-blue-950">
                 <div className="text-center">
@@ -92,24 +145,24 @@ export default function PaymentTracker() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
                         <p className="text-sm text-blue-200 font-medium mb-1">Total Students</p>
-                        <p className="text-3xl font-bold text-white">{students.length}</p>
+                        <p className="text-3xl font-bold text-white">{stats.totalStudents}</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-lg">
                         <p className="text-sm text-white font-medium mb-1">Fully Paid</p>
                         <p className="text-3xl font-bold text-white">
-                            {students.filter(s => s.status === 'Fully Paid').length}
+                            {stats.fullyPaid}
                         </p>
                     </div>
                     <div className="bg-blue-600/20 backdrop-blur-md p-6 rounded-2xl border border-blue-500/30 shadow-lg">
                         <p className="text-sm text-blue-100 font-medium mb-1">Partially Paid</p>
                         <p className="text-3xl font-bold text-white">
-                            {students.filter(s => s.status === 'Partially Paid').length}
+                            {stats.partiallyPaid}
                         </p>
                     </div>
                     <div className="bg-transparent p-6 rounded-2xl border border-white/10 shadow-lg">
                         <p className="text-sm text-blue-300 font-medium mb-1">Not Paid</p>
                         <p className="text-3xl font-bold text-white">
-                            {students.filter(s => s.status === 'Not Paid').length}
+                            {stats.notPaid}
                         </p>
                     </div>
                 </div>
@@ -147,7 +200,7 @@ export default function PaymentTracker() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {filteredStudents.map((student, index) => (
+                                {students.map((student, index) => (
                                     <tr key={index} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                                             {student.studentName}
@@ -182,11 +235,14 @@ export default function PaymentTracker() {
                     </div>
                 </div>
 
-                {filteredStudents.length === 0 && (
+                {students.length === 0 && !loading && (
                     <div className="text-center py-12">
                         <p className="text-blue-200 text-lg">No students found matching your search.</p>
                     </div>
                 )}
+
+                {/* Pagination */}
+                <PaginationControls />
             </div>
         </div>
     );

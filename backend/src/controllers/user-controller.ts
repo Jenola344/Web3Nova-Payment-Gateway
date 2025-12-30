@@ -36,15 +36,27 @@ export const getAllStudents = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
     const skip = (page - 1) * limit;
 
-    const students = await Student.find()
+    let query: any = {};
+    if (search) {
+      query = {
+        $or: [
+          { fullName: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { skill: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+
+    const students = await Student.find(query)
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Student.countDocuments();
+    const total = await Student.countDocuments(query);
 
     return res.status(200).json({
       success: true,
@@ -244,6 +256,32 @@ export const updateStudent = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Server error while updating student'
+    });
+  }
+};
+// Get student statistics (Admin & Public Tracker)
+export const getStudentStats = async (req: AuthRequest, res: Response) => {
+  try {
+    const totalStudents = await Student.countDocuments();
+    const fullyPaid = await Student.countDocuments({ remainingBalance: 0 });
+    const partiallyPaid = await Student.countDocuments({ amountPaid: { $gt: 0 }, remainingBalance: { $gt: 0 } });
+    const notPaid = await Student.countDocuments({ amountPaid: 0 });
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalStudents,
+        fullyPaid,
+        partiallyPaid,
+        notPaid
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Get student stats error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while fetching stats'
     });
   }
 };

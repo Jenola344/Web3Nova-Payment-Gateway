@@ -339,14 +339,26 @@ export const getPaymentTracker = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
     const skip = (page - 1) * limit;
 
-    const students = await Student.find()
+    let query: any = {};
+    if (search) {
+      query = {
+        $or: [
+          { fullName: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { skill: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+
+    const students = await Student.find(query)
       .select('fullName email skill scholarshipType totalFees amountPaid remainingBalance')
       .skip(skip)
       .limit(limit);
 
-    const total = await Student.countDocuments();
+    const total = await Student.countDocuments(query);
 
     const paymentStatus = students.map(student => {
       let status = 'Not Paid';

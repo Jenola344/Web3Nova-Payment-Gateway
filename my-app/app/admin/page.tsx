@@ -9,10 +9,13 @@ import { Student, Task, Submission } from '@/types';
 export default function AdminDashboard() {
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [creatingTask, setCreatingTask] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [paymentAmount, setPaymentAmount] = useState('');
     const router = useRouter();
+
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -25,25 +28,80 @@ export default function AdminDashboard() {
     // Task State
     const [tasks, setTasks] = useState<Task[]>([]);
     const [showTaskModal, setShowTaskModal] = useState(false);
-    const [taskData, setTaskData] = useState({ title: '', description: '', deadline: '', assignedStudents: [] as string[] });
+    const [taskData, setTaskData] = useState({
+        title: '',
+        description: '',
+        deadline: '',
+        assignedStudents: [] as string[],
+        assignedSkills: [] as string[]
+    });
     const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
     const [selectedTaskSubmissions, setSelectedTaskSubmissions] = useState<Submission[]>([]);
     const [gradingSubmissionId, setGradingSubmissionId] = useState<string | null>(null);
     const [gradeInput, setGradeInput] = useState('');
     const [feedbackInput, setFeedbackInput] = useState('');
 
+    // Stats State
+    const [dashboardStats, setDashboardStats] = useState({
+        totalStudents: 0,
+        fullyPaid: 0,
+        partiallyPaid: 0,
+        notPaid: 0
+    });
+
+    const [loadingStats, setLoadingStats] = useState(true);
+
+    useEffect(() => {
+        fetchStats();
+        fetchAllStudents(currentPage, searchTerm);
+        fetchTasks(taskPage); // Fixed function name
+    }, []); // Initial load only? Or separate...
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentPage(1);
+            fetchAllStudents(1, searchTerm);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        if (currentPage !== 1) {
+            fetchAllStudents(currentPage, searchTerm);
+        }
+    }, [currentPage]);
+
+    // Handle Tab Changes
     useEffect(() => {
         if (activeTab === 'students') {
-            fetchAllStudents(currentPage);
+            // fetchAllStudents handled by other effects mostly, but maybe refresh?
+            // Actually existing logic had it. Let's simplify:
+            // fetchAllStudents(currentPage, searchTerm);
         } else if (activeTab === 'tasks') {
             fetchTasks(taskPage);
         }
-    }, [activeTab, currentPage, taskPage]);
+    }, [activeTab, taskPage]);
 
-    const fetchAllStudents = async (page = 1) => {
+    const fetchStats = async () => {
+        try {
+            setLoadingStats(true); // reset loading state if refreshing?
+            const response = await api.getDashboardStats();
+            if (response.success) {
+                setDashboardStats(response.stats);
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        } finally {
+            setLoadingStats(false);
+        }
+    };
+
+    const fetchAllStudents = async (page: number, search: string) => {
         setLoading(true);
         try {
-            const response = await api.getAllStudents(page);
+            const response = await api.getAllStudents(page, 10, search);
             if (response.success) {
                 setStudents(response.students);
                 if (response.pagination) {
@@ -279,6 +337,7 @@ export default function AdminDashboard() {
 
     const handleCreateTask = async (e: React.FormEvent) => {
         e.preventDefault();
+        setCreatingTask(true);
         try {
             const response = await api.createTask({
                 ...taskData,
@@ -287,13 +346,15 @@ export default function AdminDashboard() {
             if (response.success) {
                 alert('Task created successfully');
                 setShowTaskModal(false);
-                setTaskData({ title: '', description: '', deadline: '', assignedStudents: [] });
+                setTaskData({ title: '', description: '', deadline: '', assignedStudents: [], assignedSkills: [] });
                 fetchTasks(taskPage);
             } else {
                 alert(response.message || 'Failed to create task');
             }
         } catch (error) {
             alert('Error creating task');
+        } finally {
+            setCreatingTask(false);
         }
     };
 
@@ -362,27 +423,29 @@ export default function AdminDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                             <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
                                 <p className="text-sm text-blue-200 font-medium mb-1">Total Students</p>
-                                <p className="text-3xl font-bold text-white">{students.length}</p>
+                                <p className="text-3xl font-bold text-white">{dashboardStats.totalStudents}</p>
                             </div>
                             <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
                                 <p className="text-sm text-white font-medium mb-1">Fully Paid</p>
                                 <p className="text-3xl font-bold text-white">
-                                    {students.filter(s => s.remainingBalance === 0).length}
+                                    {dashboardStats.fullyPaid}
                                 </p>
                             </div>
+
                             <div className="bg-blue-600/10 backdrop-blur-md p-6 rounded-2xl border border-blue-500/20 shadow-lg">
                                 <p className="text-sm text-blue-100 font-medium mb-1">Partially Paid</p>
                                 <p className="text-3xl font-bold text-white">
-                                    {students.filter(s => s.amountPaid > 0 && s.remainingBalance > 0).length}
+                                    {dashboardStats.partiallyPaid}
                                 </p>
                             </div>
                             <div className="bg-transparent p-6 rounded-2xl border border-white/10 shadow-lg">
                                 <p className="text-sm text-blue-300 font-medium mb-1">Not Paid</p>
                                 <p className="text-3xl font-bold text-white">
-                                    {students.filter(s => s.amountPaid === 0).length}
+                                    {dashboardStats.notPaid}
                                 </p>
                             </div>
                         </div>
+
 
                         {/* Search */}
                         <div className="mb-8">
@@ -419,7 +482,7 @@ export default function AdminDashboard() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
-                                        {filteredStudents.map((student) => (
+                                        {students.map((student) => (
                                             <tr key={student._id} className="hover:bg-white/5 transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{student.fullName}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-200">{student.email}</td>
@@ -669,7 +732,7 @@ export default function AdminDashboard() {
             {/* Task Creation Modal */}
             {showTaskModal && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-                    <div className="bg-blue-900 p-8 rounded-2xl max-w-lg w-full border border-white/10">
+                    <div className="bg-blue-900 p-8 rounded-2xl max-w-2xl w-full border border-white/10 max-h-[90vh] overflow-y-auto">
                         <h3 className="text-xl font-bold mb-4">Create New Task</h3>
                         <form onSubmit={handleCreateTask} className="space-y-4">
                             <input
@@ -683,7 +746,7 @@ export default function AdminDashboard() {
                                 placeholder="Description"
                                 value={taskData.description}
                                 onChange={e => setTaskData({ ...taskData, description: e.target.value })}
-                                className="w-full p-3 bg-white/5 rounded-xl border border-white/10 text-white"
+                                className="w-full p-3 bg-white/5 rounded-xl border border-white/10 text-white h-24"
                                 required
                             />
                             <input
@@ -693,25 +756,53 @@ export default function AdminDashboard() {
                                 className="w-full p-3 bg-white/5 rounded-xl border border-white/10 text-white"
                                 required
                             />
-                            <div>
-                                <label className="block mb-2 text-sm">Assign Students (Select multiple)</label>
-                                <select
-                                    multiple
-                                    value={taskData.assignedStudents}
-                                    onChange={e => {
-                                        const selected = Array.from(e.target.selectedOptions, option => option.value);
-                                        setTaskData({ ...taskData, assignedStudents: selected });
-                                    }}
-                                    className="w-full p-3 bg-white/5 rounded-xl border border-white/10 text-white h-32"
-                                >
-                                    {students.map(s => (
-                                        <option key={s._id} value={s._id}>{s.fullName}</option>
+
+                            <div className="space-y-4">
+                                <label className="block text-sm font-medium text-blue-200">Assign by Course/Skill</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {['Web Development', 'Smart Contract', 'UI/UX Design'].map((skill) => (
+                                        <div key={skill} className="flex items-center space-x-3 bg-white/5 p-3 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                                            <input
+                                                type="checkbox"
+                                                id={`skill-${skill}`}
+                                                value={skill}
+                                                checked={taskData.assignedSkills.includes(skill)}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setTaskData(prev => {
+                                                        const newSkills = checked
+                                                            ? [...prev.assignedSkills, skill]
+                                                            : prev.assignedSkills.filter(s => s !== skill);
+                                                        return { ...prev, assignedSkills: newSkills };
+                                                    });
+                                                }}
+                                                className="w-5 h-5 rounded border-white/20 bg-black/40 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+                                            />
+                                            <label htmlFor={`skill-${skill}`} className="text-white cursor-pointer select-none flex-1">
+                                                {skill}
+                                            </label>
+                                        </div>
                                     ))}
-                                </select>
+                                </div>
+                                <p className="text-xs text-blue-300">Select one or more courses to assign this task to all enrolled students.</p>
                             </div>
+
                             <div className="flex gap-4 pt-4">
-                                <button type="submit" className="flex-1 bg-blue-600 py-3 rounded-xl font-bold">Create Task</button>
-                                <button type="button" onClick={() => setShowTaskModal(false)} className="flex-1 bg-white/10 py-3 rounded-xl">Cancel</button>
+                                <button
+                                    type="submit"
+                                    disabled={creatingTask}
+                                    className="flex-1 bg-blue-600 py-3 rounded-xl font-bold hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+                                >
+                                    {creatingTask ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        'Create Task'
+                                    )}
+                                </button>
+                                <button type="button" onClick={() => setShowTaskModal(false)} className="flex-1 bg-white/10 py-3 rounded-xl hover:bg-white/20 transition-colors">Cancel</button>
                             </div>
                         </form>
                     </div>

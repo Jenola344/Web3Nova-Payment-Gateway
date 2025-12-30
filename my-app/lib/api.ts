@@ -54,19 +54,26 @@ export const api = {
     },
 
     // Public
-    async getPaymentTracker() {
-        const res = await fetch(`${API_URL}/payments/tracker`);
+    async getPaymentTracker(page = 1, limit = 10, search = '') {
+        const res = await fetch(`${API_URL}/payments/tracker?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
         return res.json();
     },
 
     // Admin
-    // Admin methods
-    async getAllStudents(page = 1, limit = 10) {
-        const res = await fetch(`${API_URL}/user/all?page=${page}&limit=${limit}`, {
+    async getAllStudents(page = 1, limit = 10, search = '') {
+        const res = await fetch(`${API_URL}/user/all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`, {
             credentials: 'include',
         });
         return res.json();
     },
+
+    async getDashboardStats() {
+        const res = await fetch(`${API_URL}/user/stats/dashboard`, {
+            credentials: 'include', // or omit if public, but safer to include or handle as needed
+        });
+        return res.json();
+    },
+
 
 
     async updateStudentPayment(studentId: string, amount: number) {

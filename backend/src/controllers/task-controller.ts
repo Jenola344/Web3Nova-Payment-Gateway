@@ -3,18 +3,40 @@ import { AuthRequest } from '../types/index';
 import Task from '../models/Task';
 import Submission from '../models/Submission';
 import Student from '../models/Student';
-import { sendTaskAssignmentEmail } from '../services/email-service';
+import { sendTaskAssignmentEmail, sendGradeNotificationEmail } from '../services/email-service';
 
 // Create a new task (Admin only)
 export const createTask = async (req: AuthRequest, res: Response) => {
     try {
         const adminId = req.user?.id;
-        const { title, description, deadline, assignedStudents } = req.body;
+        const { title, description, deadline, assignedStudents, assignedSkills } = req.body;
 
-        if (!title || !description || !deadline || !assignedStudents || !Array.isArray(assignedStudents)) {
+        if (!title || !description || !deadline) {
             return res.status(400).json({
                 success: false,
                 message: 'Please provide all required fields'
+            });
+        }
+
+        let studentIds: string[] = [];
+
+        // Add manually assigned students
+        if (assignedStudents && Array.isArray(assignedStudents)) {
+            studentIds = [...assignedStudents];
+        }
+
+        // Find students by skill and add them
+        if (assignedSkills && Array.isArray(assignedSkills) && assignedSkills.length > 0) {
+            const studentsWithSkill = await Student.find({ skill: { $in: assignedSkills } }).select('_id');
+            const skillStudentIds = studentsWithSkill.map(s => s._id.toString());
+            // Merge and dedup
+            studentIds = Array.from(new Set([...studentIds, ...skillStudentIds]));
+        }
+
+        if (studentIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No students found for the selected skills or assignment'
             });
         }
 
@@ -22,30 +44,34 @@ export const createTask = async (req: AuthRequest, res: Response) => {
             title,
             description,
             deadline,
-            assignedStudents,
+            assignedStudents: studentIds,
             createdBy: adminId,
             status: 'active'
         });
 
-        // Send emails to assigned students
-        const students = await Student.find({ _id: { $in: assignedStudents } });
+        // Send emails to assigned students - NON-BLOCKING
+        try {
+            const students = await Student.find({ _id: { $in: studentIds } });
 
-        // Convert to parallel promises for speed
-        await Promise.all(students.map(student =>
-            sendTaskAssignmentEmail(
-                student.email,
-                student.fullName,
-                task.title,
-                task.deadline
-            )
-        ));
+            // Send emails individually and catch individual errors if needed, or catch block for all
+            await Promise.allSettled(students.map(student =>
+                sendTaskAssignmentEmail(
+                    student.email,
+                    student.fullName,
+                    task.title,
+                    task.deadline.toString()
+                )
+            ));
+            console.log('Task assignment email process completed');
+        } catch (emailError: any) {
+            console.error('Email sending error (Task created):', emailError.message);
+        }
 
         return res.status(201).json({
             success: true,
-            message: 'Task created and students notified',
+            message: 'Task created successfully',
             task
         });
-
     } catch (error: any) {
         console.error('Create task error:', error);
         return res.status(500).json({
