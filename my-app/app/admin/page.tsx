@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                 alert('Payment updated successfully!');
                 setSelectedStudent(null);
                 setPaymentAmount('');
-                fetchAllStudents();
+                fetchAllStudents(currentPage, searchTerm);
             } else {
                 alert(response.message || 'Failed to update payment');
             }
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
             if (response.success) {
                 alert('Student registered successfully');
                 setShowAddModal(false);
-                fetchAllStudents();
+                fetchAllStudents(currentPage, searchTerm);
                 setFormData({
                     fullName: '',
                     email: '',
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
                 alert('Student updated successfully');
                 setShowEditModal(false);
                 setSelectedStudent(null);
-                fetchAllStudents();
+                fetchAllStudents(currentPage, searchTerm);
             } else {
                 alert(response.message || 'Failed to update student');
             }
