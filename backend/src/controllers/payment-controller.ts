@@ -172,7 +172,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
     if (!student) {
       return res.status(404).json({
         success: false,
-        message: 'Student not found' 
+        message: 'Student not found'
       });
     }
 
