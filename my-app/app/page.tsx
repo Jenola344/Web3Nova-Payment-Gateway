@@ -80,7 +80,7 @@ export default function Home() {
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
-      const deadline = new Date('2025-12-31T23:59:59').getTime();
+      const deadline = new Date('2026-01-12T23:59:59').getTime();
       const distance = deadline - now;
 
       if (distance < 0) {
