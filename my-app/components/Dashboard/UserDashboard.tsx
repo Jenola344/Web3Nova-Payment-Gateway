@@ -30,11 +30,7 @@ export default function UserDashboard() {
         fetchProfile();
         // Check pending payment status
         if (paymentReference) {
-            api.checkPaymentStatus(paymentReference).then((response) => {
-                if (response.success) {
-                    fetchProfile();
-                }
-            });
+            startPaymentStatusPolling(paymentReference);
         }
     }, []);
 

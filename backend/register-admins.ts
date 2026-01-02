@@ -70,9 +70,9 @@ async function registerAllAdmins() {
   for (let i = 0; i < admins.length; i++) {
     const admin = admins[i];
     console.log(`[${i + 1}/${admins.length}] Registering: ${admin.username} (${admin.email})...`);
-    
+
     const result = await registerAdmin(admin);
-    
+
     if (result.success) {
       successCount++;
       console.log(`✓ Success: ${result.admin}`);
@@ -81,9 +81,9 @@ async function registerAllAdmins() {
       failCount++;
       console.log(`✗ Failed: ${result.admin} - ${result.error}`);
     }
-    
+
     console.log('---');
-    
+
     // Add small delay between requests
     await new Promise(resolve => setTimeout(resolve, 500));
   }
