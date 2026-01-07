@@ -19,7 +19,14 @@ app.set('trust proxy', 1);
 app.use(helmet());
 console.log(process.env.FRONTEND_URL);
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: (origin, callback) => {
+    const allowedOrigins = [process.env.FRONTEND_URL, process.env.FRONTEND_URL?.replace(/\/$/, '')];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
