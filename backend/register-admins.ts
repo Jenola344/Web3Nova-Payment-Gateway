@@ -38,6 +38,21 @@ const admins: Admin[] = [
     username: 'ogunodemarvellous',
     email: 'ogunodemarvellous@gmail.com',
     password: DEFAULT_PASSWORD
+  },
+  {
+    username: 'navigator',
+    email: 'navigatorabraham17@gmail.com',
+    password: DEFAULT_PASSWORD
+  },
+  {
+    username: 'rokeeb',
+    email: 'rokeeb@gmail.com',
+    password: DEFAULT_PASSWORD
+  },
+  {
+    username: 'lexicon',
+    email: 'lexicon@gmail.com',
+    password: DEFAULT_PASSWORD
   }
 ];
 

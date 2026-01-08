@@ -25,7 +25,7 @@ export const setTokenCookie = (res: Response, token: string) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax', // Corrected typo: used colon instead of semicolon in my thought process, but code was fine. Wait, let me double check.
+    sameSite: isProduction ? 'none' : 'lax', 
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/',
   });
